@@ -9,7 +9,6 @@ module FinOps
 
       # @param client_id [UUID]
       # @param amount_cents [Integer]
-      # @param idempotency_key [String]
       #
       # @return [FinOps::Deposit]
       # @raise [ActiveRecord::RecordNotFound]

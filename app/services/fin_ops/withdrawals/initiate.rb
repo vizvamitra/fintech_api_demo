@@ -11,7 +11,6 @@ module FinOps
 
       # @param client_id [UUID]
       # @param amount_cents [Integer]
-      # @param idempotency_key [String]
       #
       # @return [FinOps::Withdrawal]
       # @raise [ActiveRecord::RecordNotFound]
@@ -64,7 +63,7 @@ module FinOps
       end
 
       def reserve_funds(payer, withdrawal)
-        # _reserve_funds.call(payer:, amount_cents: withdrawal.amount_cents)
+        _reserve_funds.call(payer:, withdrawal:)
       end
 
       def settle_withdrawal(withdrawal, settled_at)
@@ -72,7 +71,7 @@ module FinOps
       end
 
       def record_withdrawal(payer, withdrawal)
-        # _record_withdrawal.call(payer:, withdrawal:)
+        _record_withdrawal.call(payer:, withdrawal:)
       end
 
       def notify_cx_about_money_movement(payer, withdrawal)

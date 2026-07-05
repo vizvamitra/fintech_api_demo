@@ -19,6 +19,7 @@ module FinOps
           reference_id: withdrawal.public_id,
           description: entry_description(payer, withdrawal),
           effective_at: withdrawal.created_at,
+          idempotency_key: "withrawal|#{withdrawal.public_id}|reservation",
           postings: [
             # transfer from available to reserved account
             posting(payer.available_funds_account, :debit, withdrawal.amount_cents),
@@ -38,6 +39,10 @@ module FinOps
           "$#{(withdrawal.amount_cents.to_f / 100).round(2)}",
           "Fund Reservation"
         ].join(" - ")
+      end
+
+      def posting(account, side, amount_cents)
+        { account:, side:, amount_cents: }
       end
     end
   end

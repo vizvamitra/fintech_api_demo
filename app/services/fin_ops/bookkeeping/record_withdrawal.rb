@@ -20,6 +20,7 @@ module FinOps
           reference_id: withdrawal.public_id,
           description: entry_description(payer, withdrawal),
           effective_at: withdrawal.settled_at,
+          idempotency_key: "withdrawal|#{withdrawal.public_id}|settlement",
           postings: [
             # Decrease assets
             posting(PP_BALANCE_ACCOUNT, :credit, withdrawal.amount_cents),

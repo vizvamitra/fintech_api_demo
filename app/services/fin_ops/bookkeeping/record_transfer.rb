@@ -20,11 +20,12 @@ module FinOps
           reference_id: transfer.public_id,
           description: entry_description(sender, receiver, transfer),
           effective_at: transfer.created_at,
+          idempotency_key: "transfer|#{transfer.public_id}",
           postings: [
             # Decrease assets
-            posting(sender.reserved_funds_account, :debit, transfer.amount_cents),
+            posting(sender.available_funds_account, :debit, transfer.amount_cents),
             # Decrease liabilities
-            posting(receiver.available_funds_account, :creadit, transfer.amount_cents)
+            posting(receiver.available_funds_account, :credit, transfer.amount_cents)
           ]
         )
       end

@@ -1,6 +1,6 @@
 ### Accounting
 [
-  [ :asset, :debit, 1100, "assets:payment-processor-balance" ]
-].each do |category, natural_balance, code, label|
-  Accounting::Account.create(category:, natural_balance:, code:, label:)
+  [ :asset, "1100", "assets:payment-processor-balance" ]
+].each do |category, code, label|
+  Accounting::Interface.new.create_account(category:, code:, label:)
 end

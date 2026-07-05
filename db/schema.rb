@@ -10,10 +10,48 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_05_130623) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_05_175759) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "uuid-ossp"
+
+  create_table "accounting_accounts", force: :cascade do |t|
+    t.integer "category", limit: 2, null: false
+    t.uuid "client_id"
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.string "label", null: false
+    t.integer "natural_balance", limit: 2, null: false
+    t.string "owner_ref"
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_accounting_accounts_on_category"
+    t.index ["client_id"], name: "index_accounting_accounts_on_client_id"
+    t.index ["label"], name: "index_accounting_accounts_on_label", unique: true
+    t.check_constraint "natural_balance = ANY (ARRAY[1, '-1'::integer])"
+  end
+
+  create_table "accounting_journal_entries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "description", null: false
+    t.datetime "effective_at", null: false
+    t.string "idempotency_key", null: false
+    t.bigint "reference_id", null: false
+    t.string "reference_type", null: false
+    t.index ["idempotency_key"], name: "index_accounting_journal_entries_on_idempotency_key", unique: true
+  end
+
+  create_table "accounting_postings", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.bigint "journal_entry_id", null: false
+    t.integer "side", limit: 2, null: false
+    t.index ["account_id"], name: "index_accounting_postings_on_account_id"
+    t.index ["journal_entry_id"], name: "index_accounting_postings_on_journal_entry_id"
+    t.index ["side"], name: "index_accounting_postings_on_side"
+    t.check_constraint "amount_cents > 0"
+    t.check_constraint "side = ANY (ARRAY[1, '-1'::integer])"
+  end
 
   create_table "credentials", force: :cascade do |t|
     t.uuid "client_id"

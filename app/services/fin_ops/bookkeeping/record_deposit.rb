@@ -20,6 +20,7 @@ module FinOps
           reference_id: deposit.public_id,
           description: entry_description(payer, deposit),
           effective_at: deposit.created_at,
+          idempotency_key: "deposit|#{deposit.public_id}",
           postings: [
             # Increase assets
             posting(PP_BALANCE_ACCOUNT, :debit, deposit.amount_cents),
