@@ -1,64 +1,79 @@
-## Debugging
+# Example `curl` Commands
 
-```bash
-JQ_DEBUG='{data, errors, status, error, exception, traces: {"Application Trace": (.traces["Application Trace"] // [])[:3]}}'
-```
+This list provides a complete scenario:
+
+- Sign up twice, creating two clients: "sender" and "receiver"
+- Fetch access tokens for both
+- Fetch client records to check balances and get public IDs
+- As "sender", deposit $200
+- As "sender", transfer $100 to "receiver"
+- As "receiver", withdraw $50
+- List money movements for both
+
+Scenario should leave sender with $100, receiver -- with $50, and create the following money movements:
+
+Sender:
+- deposit, $200
+- outgoing_transfer, $100
+
+Receiver:
+- incoming_transfer, $100,
+- withdrawal, $50
 
 ## Sign Up
 
 ```bash
 # main client
-curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"email": "test@example.com"}' | jq $JQ_DEBUG
+curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"email": "test@example.com"}'
 
 # other client (for transfers)
-curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"email": "test2@example.com"}' | jq $JQ_DEBUG
+curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"email": "test2@example.com"}'
 ```
 
 ## Sign In
 
 ```bash
-curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ins -d '{"sign_in": {"email": "test@example.com"}}' | jq $JQ_DEBUG
+curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ins -d '{"sign_in": {"email": "test@example.com"}}'
 
-TOKEN=...
+SENDER_TOKEN=... # token from the response of the command above
 
-curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ins -d '{"sign_in": {"email": "test2@example.com"}}' | jq $JQ_DEBUG
+curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ins -d '{"sign_in": {"email": "test2@example.com"}}'
 
-TOKEN2=...
+RECEIVER_TOKEN=... # token from the response of the command above
 ```
 
-## Read Balance
+## Get Client
 
 ```bash
-curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $TOKEN" localhost:3000/api/client | jq $JQ_DEBUG
+curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/client
 
-curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $TOKEN2" localhost:3000/api/client | jq $JQ_DEBUG
+curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $RECEIVER_TOKEN" localhost:3000/api/client
 
-RECEIVER_ID=...
+RECEIVER_ID=... # public_id from the response of the command above
 ```
 
 ## Create Deposit
 
 ```bash
-curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $TOKEN" localhost:3000/api/fin_ops/deposits -d '{"amount_cents": 200}' | jq $JQ_DEBUG
+curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/fin_ops/deposits -d '{"amount_cents": 20000}'
 ```
 
 ## Create Transfer
 
 ```bash
-curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $TOKEN" localhost:3000/api/fin_ops/transfers -d "{\"amount_cents\": 100, \"receiver_id\": \"$RECEIVER_ID\"}" | jq $JQ_DEBUG
+curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/fin_ops/transfers -d "{\"amount_cents\": 10000, \"receiver_id\": \"$RECEIVER_ID\"}"
 ```
 
 ## Create Withdrawal
 
 ```bash
-curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $TOKEN2" localhost:3000/api/fin_ops/withdrawals -d '{"amount_cents": 50}' | jq $JQ_DEBUG
+curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $RECEIVER_TOKEN" localhost:3000/api/fin_ops/withdrawals -d '{"amount_cents": 5000}'
 ```
-
 
 ## List Money Movements
 
 ```bash
-curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $TOKEN" localhost:3000/api/cx/money_movements | jq $JQ_DEBUG
+curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/cx/money_movements
 
-curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $TOKEN2" localhost:3000/api/cx/money_movements | jq $JQ_DEBUG
+curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $RECEIVER_TOKEN" localhost:3000/api/cx/money_movements
 ```
