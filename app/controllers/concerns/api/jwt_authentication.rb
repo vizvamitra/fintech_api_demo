@@ -19,7 +19,7 @@ module Api
       payload = decode_jwt(jwt)
 
       credentials = Credentials.find(payload["sub"].to_i)
-      raise HttpErrors::Unauthenticated unless credentials
+      raise HttpErrors::UnauthorizedError unless credentials
 
       @current_credentials = credentials
     rescue JWT::VerificationError, JWT::DecodeError

@@ -15,8 +15,10 @@ module Api
         #
         def call(client_id:, amount_cents:)
           _fin_ops.initiate_withdrawal(client_id:, amount_cents:)
-        rescue ::FinOps::NegativeAmountError
-          raise HttpErrors::UnprocessableContentError, :negative_balance
+        rescue ::FinOps::AmountBelowMinimumError
+          raise HttpErrors::UnprocessableContentError, :amount_below_minimum
+        rescue ::FinOps::InsufficientFundsError, ::Accounting::InsufficientFundsError
+          raise HttpErrors::UnprocessableContentError, :insufficient_funds
         end
 
         private

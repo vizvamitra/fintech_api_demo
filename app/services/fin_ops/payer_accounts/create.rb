@@ -13,7 +13,7 @@ module FinOps
         ApplicationRecord.transaction do
           accounts = provision_client_accounts(client_id)
 
-          PayerAccount.create(
+          PayerAccount.create!(
             client_id:,
             available_funds_account: accounts[:available],
             reserved_funds_account: accounts[:reserved]

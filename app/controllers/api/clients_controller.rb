@@ -6,7 +6,7 @@ module Api
 
       balance = accounting.read_account_balance(label: payer.available_funds_account)
 
-      render json: serialize(client, balance:)
+      render json: serialize(client, balance)
     end
 
     private
@@ -15,8 +15,8 @@ module Api
       ::Accounting::Interface.new
     end
 
-    def serialize(client, **deposit)
-      ClientSerializer.new(client, params: { deposit: })
+    def serialize(client, balance)
+      ClientSerializer.new(client, params: { balance_cents: balance })
     end
   end
 end

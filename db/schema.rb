@@ -35,7 +35,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_175759) do
     t.string "description", null: false
     t.datetime "effective_at", null: false
     t.string "idempotency_key", null: false
-    t.bigint "reference_id", null: false
+    t.string "reference_id", null: false
     t.string "reference_type", null: false
     t.index ["idempotency_key"], name: "index_accounting_journal_entries_on_idempotency_key", unique: true
   end

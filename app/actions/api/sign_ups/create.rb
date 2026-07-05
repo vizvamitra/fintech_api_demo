@@ -12,11 +12,8 @@ module Api
       #
       def call(email:)
         ApplicationRecord.transaction do
-          credentials = Credentials.create(email:)
-
           client = _clients.create_client(contact_email: email)
-
-          credentials.update!(client_id: client.public_id)
+          Credentials.create!(email:, client_id: client.public_id)
         end
       end
 

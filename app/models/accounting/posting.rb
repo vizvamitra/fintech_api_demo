@@ -6,6 +6,6 @@ module Accounting
     enum :side, { debit: 1, credit: -1 }
 
     validates :amount_cents, :side, presence: true
-    validates :amount_cents, numericality: { gte: 0 }
+    validates :amount_cents, numericality: { greater_than: 0 }
   end
 end

@@ -3,7 +3,7 @@ module Api
     class DepositsController < ApiController
       def create
         deposit = Deposits::Create.new.call(**create_params.to_h.symbolize_keys)
-        render :created, json: Alba.serialize(deposit)
+        render status: :created, json: Alba.serialize(deposit)
       end
 
       private

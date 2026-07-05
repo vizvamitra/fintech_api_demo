@@ -20,20 +20,18 @@ module Accounting
       # @return [void]
       # @raise [ActiveRecord::RecordNotFound]
       # @raise [Accounting::UnbalancedJournalEntryError]
-      # @raise [Accounting::InsufficientBalanceError]
+      # @raise [Accounting::InsufficientFundsError]
       #
       def call(postings:, **entry_attributes)
         raise UnbalancedJournalEntryError unless balanced?(postings)
 
         ApplicationRecord.transaction do
+          accounts = find_and_lock_accounts(postings)
           entry = create_entry(entry_attributes)
 
-          postings.each do |posting|
-            account = Account.find_by!(label: posting[:account])
-            # In a real app there would be safety measures against race conditions, but
-            # I omit them for simplicity there
-            #
-            raise InsufficientBalanceError if !sufficient_balance?(account, posting)
+          postings.sort_by { _1[:account] }.each do |posting|
+            account = accounts.find { _1.label == posting[:account] }
+            raise InsufficientFundsError if !sufficient_balance?(account, posting)
 
             create_posting(account, entry, posting[:side], posting[:amount_cents])
           end
@@ -43,6 +41,12 @@ module Accounting
       private
 
       attr_reader :_read_balance
+
+      def find_and_lock_accounts(postings)
+        postings
+          .sort_by { _1[:account] }
+          .map { Account.find_by!(label: _1[:account]).lock! }
+      end
 
       def balanced?(postings)
         debits = postings.select { _1[:side] == :debit }.sum { _1[:amount_cents] }

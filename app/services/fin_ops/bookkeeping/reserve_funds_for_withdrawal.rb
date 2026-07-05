@@ -19,7 +19,7 @@ module FinOps
           reference_id: withdrawal.public_id,
           description: entry_description(payer, withdrawal),
           effective_at: withdrawal.created_at,
-          idempotency_key: "withrawal|#{withdrawal.public_id}|reservation",
+          idempotency_key: "withdrawal|#{withdrawal.public_id}|reservation",
           postings: [
             # transfer from available to reserved account
             posting(payer.available_funds_account, :debit, withdrawal.amount_cents),

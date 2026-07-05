@@ -29,7 +29,7 @@ CR  Liabilities:ClientDeposits:xxxx:Available  100  (+100)
 DR  Liabilities:ClientDeposits:xxxx:Reserved   100  (-100)
 CR  Assets:PaymentProcessorBalance             100  (-100)
 
-### 4. Transfer Between CLients
+### 4. Transfer Between Clients
 
 DR  Liabilities:ClientDeposits:xxxx:Available  100  (-100)
 CR  Liabilities:ClientDeposits:yyyy:Available  100  (+100)

@@ -22,9 +22,8 @@ module FinOps
           effective_at: transfer.created_at,
           idempotency_key: "transfer|#{transfer.public_id}",
           postings: [
-            # Decrease assets
+            # Transfer from sender's available balance to receiver's
             posting(sender.available_funds_account, :debit, transfer.amount_cents),
-            # Decrease liabilities
             posting(receiver.available_funds_account, :credit, transfer.amount_cents)
           ]
         )

@@ -38,7 +38,7 @@ RSpec.describe FinOps::Deposits::Initiate do
 
   context "when amount is negative" do
     let(:amount_cents) { -100_00 }
-    it { expect { initiate }.to raise_error(FinOps::NegativeAmountError) }
+    it { expect { initiate }.to raise_error(FinOps::AmountBelowMinimumError) }
   end
 
   context "when payer account doesn't exist" do

@@ -3,7 +3,7 @@ module Api
     class TransfersController < ApiController
       def create
         transfer = Transfers::Create.new.call(**create_params.to_h.symbolize_keys)
-        render :created, json: Alba.serialize(transfer)
+        render status: :created, json: Alba.serialize(transfer)
       end
 
       private

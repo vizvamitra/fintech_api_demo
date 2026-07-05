@@ -11,7 +11,7 @@ module CX
       #
       def call(contact_email:)
         ApplicationRecord.transaction do
-          client = Client.create(contact_email:)
+          client = Client.create!(contact_email:)
           _fin_ops.create_payer_account(client_id: client.public_id)
 
           client

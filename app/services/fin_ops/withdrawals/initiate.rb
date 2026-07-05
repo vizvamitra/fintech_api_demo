@@ -14,17 +14,17 @@ module FinOps
       #
       # @return [FinOps::Withdrawal]
       # @raise [ActiveRecord::RecordNotFound]
-      # @raise [FinOps::NegativeAmountError]
+      # @raise [FinOps::AmountBelowMinimumError]
       #
       def call(client_id:, amount_cents:)
-        raise NegativeAmountError if amount_cents < 0
+        raise AmountBelowMinimumError if amount_cents <= 0
 
         payer = FinOps::PayerAccount.find_by!(client_id:)
 
-        # The real app would probably requre the client to set up his withdrawal method
+        # The real app would probably require the client to set up his withdrawal method
         # first. Then, withdrawal initiation would mean:
         #
-        # - createing a withdrawal record
+        # - creating a withdrawal record
         # - then firing an API call to the payment processor to initiate the withdrawal
         #   on their end using the configured withdrawal method
         # - then storing that withdrawal information in the DB
@@ -40,7 +40,7 @@ module FinOps
         # this, I wanted to demonstrate fund reservations.
         #
         ApplicationRecord.transaction do
-          withdrawal = crate_withdrawal(payer, amount_cents)
+          withdrawal = create_withdrawal(payer, amount_cents)
           reserve_funds(payer, withdrawal)
           notify_cx_about_money_movement(payer, withdrawal)
 
@@ -58,8 +58,8 @@ module FinOps
 
       attr_reader :_reserve_funds, :_record_withdrawal, :_clients
 
-      def crate_withdrawal(payer, amount_cents)
-        payer.withdrawals.create(state: :initiated, amount_cents:)
+      def create_withdrawal(payer, amount_cents)
+        payer.withdrawals.create!(state: :initiated, amount_cents:)
       end
 
       def reserve_funds(payer, withdrawal)

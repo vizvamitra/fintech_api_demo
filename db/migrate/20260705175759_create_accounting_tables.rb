@@ -28,7 +28,7 @@ class CreateAccountingTables < ActiveRecord::Migration[8.1]
     create_table :accounting_journal_entries do |t|
       t.string :description, null: false
       t.string :reference_type, null: false
-      t.bigint :reference_id, null: false
+      t.string :reference_id, null: false
       t.string :idempotency_key, null: false, index: { unique: true }
       t.datetime :effective_at, null: false
 

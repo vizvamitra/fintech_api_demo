@@ -12,16 +12,16 @@ module FinOps
       #
       # @return [FinOps::Deposit]
       # @raise [ActiveRecord::RecordNotFound]
-      # @raise [FinOps::NegativeAmountError]
+      # @raise [FinOps::AmountBelowMinimumError]
       #
       def call(client_id:, amount_cents:)
-        raise NegativeAmountError if amount_cents < 0
+        raise AmountBelowMinimumError if amount_cents <= 0
 
         payer = FinOps::PayerAccount.find_by!(client_id:)
 
         # The real app would probably work with some third-party payment processor, which
-        # would make deposits asynchronous and require the app to track their the life
-        # cycles. In that case, initiating a deposit would mean:
+        # would make deposits asynchronous and require the app to track their life cycles.
+        # In that case, initiating a deposit would mean:
         #
         # - creating a deposit record
         # - then firing an API request to the payment processor to create some kind
@@ -54,7 +54,7 @@ module FinOps
       attr_reader :_record_deposit, :_clients
 
       def create_deposit(payer, amount_cents)
-        payer.deposits.create(amount_cents:)
+        payer.deposits.create!(amount_cents:)
       end
 
       def record_deposit(payer, deposit)

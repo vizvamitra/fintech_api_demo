@@ -10,7 +10,7 @@ module ApiHelpers
   end
 
   def sign_in(client)
-    credentials = Credentials.find_by!(client_id: client.public_id)
+    credentials = Credentials.find_by!(client_id: client["public_id"])
 
     params = { email: credentials.email }
     token = post("/api/sign_ins", params:).dig('data', 'access_token')

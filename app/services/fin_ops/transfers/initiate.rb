@@ -16,16 +16,16 @@ module FinOps
       # @return [FinOps::Transfer]
       # @raise [ActiveRecord::RecordNotFound]
       # @raise [FinOps::NegativeAmountError]
-      # @raise [FinOps::NotEnoughFundsError]
+      # @raise [FinOps::InsufficientFundsError]
       #
       def call(sender_id:, receiver_id:, amount_cents:)
-        raise NegativeAmountError if amount_cents < 0
+        raise AmountBelowMinimumError if amount_cents <= 0
 
         sender = FinOps::PayerAccount.find_by!(client_id: sender_id)
         receiver = FinOps::PayerAccount.find_by!(client_id: receiver_id)
 
         balance = read_available_balance(sender)
-        raise NotEnoughFundsError if balance < amount_cents
+        raise InsufficientFundsError if balance < amount_cents
 
         ApplicationRecord.transaction do
           transfer = create_transfer(sender, receiver, amount_cents)
@@ -47,7 +47,7 @@ module FinOps
       end
 
       def create_transfer(sender, receiver, amount_cents)
-        Transfer.create(sender:, receiver:, amount_cents:)
+        Transfer.create!(sender:, receiver:, amount_cents:)
       end
 
       def record_transfer(sender, receiver, transfer)

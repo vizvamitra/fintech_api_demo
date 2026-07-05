@@ -4,7 +4,7 @@ module Api
 
     def create
       access_token = Api::SignIns::Create.new.call(**create_params)
-      render :created, json: AccessTokenSerializer.new(access_token)
+      render status: :created, json: AccessTokenSerializer.new(access_token)
     end
 
     private

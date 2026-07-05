@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe "Financial operations", type: :feature do
-  scenario "finactial operations" do
+  scenario "financial operations" do
     given_two_clients_with_zero_balances
 
     then_first_client_balance_should_be(0)
@@ -32,20 +32,17 @@ RSpec.describe "Financial operations", type: :feature do
       code: "1100",
       label: "assets:payment-processor-balance"
     )
-
-    @clients = []
   end
 
   ### Steps ###
 
   def given_two_clients_with_zero_balances
-    @clients = [
-      CX::Interface.new.create_client(contact_email: emails[0]),
-      CX::Interface.new.create_client(contact_email: emails[1])
-    ]
+    emails.each { |email| sign_up(email:) }
 
-    Credentials.create(email: emails[0], client_id: @clients[0].public_id)
-    Credentials.create(email: emails[1], client_id: @clients[1].public_id)
+    @clients = [
+      CX::Client.find_by!(contact_email: emails[0]),
+      CX::Client.find_by!(contact_email: emails[1])
+    ]
   end
 
   ### When
@@ -80,7 +77,7 @@ RSpec.describe "Financial operations", type: :feature do
     sign_in(@clients[0]) do
       client = fetch_client
       expect(client).not_to be_nil
-      expect(client.dig("deposit", "balance")).to eq(amount * 100)
+      expect(client["balance_cents"]).to eq(amount * 100)
     end
   end
 
@@ -88,7 +85,7 @@ RSpec.describe "Financial operations", type: :feature do
     sign_in(@clients[1]) do
       client = fetch_client
       expect(client).not_to be_nil
-      expect(client.dig("deposit", "balance")).to eq(amount * 100)
+      expect(client["balance_cents"]).to eq(amount * 100)
     end
   end
 
