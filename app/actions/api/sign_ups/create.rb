@@ -1,7 +1,7 @@
 module Api
   module SignUps
     class Create
-      def initialize(clients: CX::Interface.new)
+      def initialize(clients: ::CX::Interface.new)
         @_clients = clients
       end
 

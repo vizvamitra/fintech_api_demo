@@ -1,19 +1,26 @@
 module CX
   module Clients
     class Create
+      def initialize(fin_ops: FinOps::Interface.new)
+        @_fin_ops = fin_ops
+      end
+
       # @param contact_email [String]
       #
-      # @return [CX::Account]
+      # @return [CX::Client]
       #
       def call(contact_email:)
         ApplicationRecord.transaction do
-          account = Client.create(contact_email:)
+          client = Client.create(contact_email:)
+          _fin_ops.create_payer_account(client_id: client.public_id)
 
-          # create payer account and accounting stuff
-
-          account
+          client
         end
       end
+
+      private
+
+      attr_reader :_fin_ops
     end
   end
 end

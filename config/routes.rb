@@ -3,6 +3,16 @@ Rails.application.routes.draw do
     resources :sign_ups, only: %i[create]
     resources :sign_ins, only: %i[create]
     resource :client, only: %i[show]
+
+    namespace "cx" do
+      resources :money_movements, only: %i[index]
+    end
+
+    namespace "fin_ops" do
+      resources :deposits, only: %i[create]
+      resources :withdrawals, only: %i[create]
+      resources :transfers, only: %i[create]
+    end
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
