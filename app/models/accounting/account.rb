@@ -4,7 +4,7 @@ module Accounting
     enum :category, { asset: 1, liability: 2 }
     enum :natural_balance, { debit: 1, credit: -1 }, suffix: "balance"
     enum :code, {
-      cash: "1100",
+      payment_processor_balance: "1110",
       client_deposit_available: "2110",
       client_deposit_reserved: "2120"
     }

@@ -1,7 +1,7 @@
 module FinOps
   module Bookkeeping
     class RecordDeposit
-      PP_BALANCE_ACCOUNT = "assets:payment-processor-balance"
+      PP_BALANCE_ACCOUNT = "assets:cash:payment-processor-balance"
       REFERENCE_TYPE = "client_deposit"
 
       def initialize(accounting: Accounting::Interface.new)
