@@ -23,10 +23,10 @@ Receiver:
 ## Sign Up
 
 ```bash
-# main client
+# sender
 curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"email": "test@example.com"}'
 
-# other client (for transfers)
+# receiver (for transfers)
 curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"email": "test2@example.com"}'
 ```
 
