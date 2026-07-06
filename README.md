@@ -2,11 +2,13 @@
 
 This is a small Rails API built as part of a client evaluation process. The goal is to show the shape of the solution, not to present a production-ready financial system.
 
+The app allows to sign up, deposit funds, transfer funds to others, withdraw funds and list money movements. The app keeps track of all cash flows using double entry accounting.
+
 The original task is kept in [docs/task_definition.md](docs/task_definition.md). Example curl calls are in [docs/curl_commands.md](docs/curl_commands.md).
 
 ## Scope Notes
 
-This project intentionally cuts corners. It has enough behavior, structure, and tests to demonstrate the approach, but it is not hardened for production use. In particular, the test suite is selective: it shows a few representative service and feature tests instead of covering every path.
+This project intentionally cuts corners. It has enough behavior, structure, and tests to demonstrate the approach, but it is not hardened for production use. No real money is involved. No integrations with payment processors. The test suite only demonstrates single examples of unit and feature tests.
 
 ## Setup
 
