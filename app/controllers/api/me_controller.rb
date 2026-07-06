@@ -1,5 +1,5 @@
 module Api
-  class ClientsController < ApiController
+  class MeController < ApiController
     def show
       client = ::CX::Client.public_find(current_credentials.client_id)
       payer = ::FinOps::PayerAccount.find_by!(client_id: client.public_id)
@@ -16,7 +16,7 @@ module Api
     end
 
     def serialize(client, balance)
-      ClientSerializer.new(client, params: { balance_cents: balance })
+      CurrentClientSerializer.new(client, params: { balance_cents: balance })
     end
   end
 end

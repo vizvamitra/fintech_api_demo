@@ -4,10 +4,11 @@ This list provides a complete scenario:
 
 - Sign up twice, creating two clients: "sender" and "receiver"
 - Fetch access tokens for both
-- Fetch client records to check balances and get public IDs
-- As "sender", deposit $200
-- As "sender", transfer $100 to "receiver"
-- As "receiver", withdraw $50
+- Fetch client records to check balances
+- As sender, deposit $200
+- As sender, search receiver by email to get public ID
+- As sender, transfer $100 to receiver
+- As receiver, withdraw $50
 - List money movements for both
 
 Scenario should leave sender with $100, receiver -- with $50, and create the following money movements:
@@ -42,14 +43,12 @@ curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ins 
 RECEIVER_TOKEN=... # token from the response of the command above
 ```
 
-## Get Client
+## Check Balances
 
 ```bash
-curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/client
+curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/me
 
-curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $RECEIVER_TOKEN" localhost:3000/api/client
-
-RECEIVER_ID=... # public_id from the response of the command above
+curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $RECEIVER_TOKEN" localhost:3000/api/me
 ```
 
 ## Create Deposit
@@ -57,6 +56,15 @@ RECEIVER_ID=... # public_id from the response of the command above
 ```bash
 curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/fin_ops/deposits -d '{"amount_cents": 20000}'
 ```
+
+## Search Client by Email
+
+```bash
+curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/cx/client\?public_email=test2@example.com
+
+RECEIVER_ID=... # public_id from the response of the command above
+```
+
 
 ## Create Transfer
 

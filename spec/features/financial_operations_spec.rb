@@ -6,6 +6,7 @@ RSpec.describe "Financial operations", type: :feature do
 
     then_first_client_balance_should_be(0)
     and_second_client_balance_should_be(0)
+    and_both_clients_should_be_searchable_by_email
 
     when_first_client_deposits_funds(amount: 200)
     then_first_client_balance_should_be(200)
@@ -40,8 +41,8 @@ RSpec.describe "Financial operations", type: :feature do
     emails.each { |email| sign_up(email:) }
 
     @clients = [
-      CX::Client.find_by!(contact_email: emails[0]),
-      CX::Client.find_by!(contact_email: emails[1])
+      CX::Client.find_by!(public_email: emails[0]),
+      CX::Client.find_by!(public_email: emails[1])
     ]
   end
 
@@ -75,7 +76,7 @@ RSpec.describe "Financial operations", type: :feature do
 
   def then_first_client_balance_should_be(amount)
     sign_in(@clients[0]) do
-      client = fetch_client
+      client = fetch_current_client
       expect(client).not_to be_nil
       expect(client["balance_cents"]).to eq(amount * 100)
     end
@@ -83,13 +84,27 @@ RSpec.describe "Financial operations", type: :feature do
 
   def then_second_client_balance_should_be(amount)
     sign_in(@clients[1]) do
-      client = fetch_client
+      client = fetch_current_client
       expect(client).not_to be_nil
       expect(client["balance_cents"]).to eq(amount * 100)
     end
   end
 
   alias :and_second_client_balance_should_be :then_second_client_balance_should_be
+
+  def and_both_clients_should_be_searchable_by_email
+    sign_in(@clients[0]) do
+      client = search_client(email: emails[1])
+      expect(client).not_to be_nil
+      expect(client["public_email"]).to eq(emails[1])
+    end
+
+    sign_in(@clients[1]) do
+      client = search_client(email: emails[0])
+      expect(client).not_to be_nil
+      expect(client["public_email"]).to eq(emails[0])
+    end
+  end
 
   def and_first_client_should_see_the_deposit(amount:)
     sign_in(@clients[0]) do

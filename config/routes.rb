@@ -2,9 +2,10 @@ Rails.application.routes.draw do
   namespace "api" do
     resources :sign_ups, only: %i[create]
     resources :sign_ins, only: %i[create]
-    resource :client, only: %i[show]
+    resource :me, only: %i[show], controller: "me"
 
     namespace "cx" do
+      resource :client, only: %i[show]
       resources :money_movements, only: %i[index]
     end
 

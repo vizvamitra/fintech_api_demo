@@ -5,13 +5,13 @@ module CX
         @_fin_ops = fin_ops
       end
 
-      # @param contact_email [String]
+      # @param public_email [String]
       #
       # @return [CX::Client]
       #
-      def call(contact_email:)
+      def call(public_email:)
         ApplicationRecord.transaction do
-          client = Client.create!(contact_email:)
+          client = Client.create!(public_email:)
           _fin_ops.create_payer_account(client_id: client.public_id)
 
           client

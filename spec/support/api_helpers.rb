@@ -27,10 +27,16 @@ module ApiHelpers
     header('Authorization', nil)
   end
 
+  ### Current Client
+
+  def fetch_current_client
+    get("api/me")["data"]
+  end
+
   ### Client Experience
 
-  def fetch_client
-    get("api/client")["data"]
+  def search_client(email:)
+    get("api/cx/client", params: { public_email: email })["data"]
   end
 
   def fetch_money_movements
@@ -63,8 +69,9 @@ module ApiHelpers
   %i[get post put patch delete head].each do |http_method|
     define_method(http_method) do |path, headers: {}, params: {}|
       header("Content-Type", "application/json")
+      params = params.to_json if %i[post put patch].include?(http_method)
 
-      result = super(path, params.to_json)
+      result = super(path, params)
 
       if result.headers['content-type'] =~ /json/
         JSON.parse(result.body)

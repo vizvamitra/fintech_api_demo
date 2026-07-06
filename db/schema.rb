@@ -63,10 +63,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_175759) do
   end
 
   create_table "cx_clients", force: :cascade do |t|
-    t.string "contact_email"
     t.datetime "created_at", null: false
+    t.string "public_email", null: false
     t.uuid "public_id", default: -> { "uuid_generate_v4()" }, null: false
     t.datetime "updated_at", null: false
+    t.index ["public_email"], name: "index_cx_clients_on_public_email", unique: true
     t.index ["public_id"], name: "index_cx_clients_on_public_id", unique: true
   end
 

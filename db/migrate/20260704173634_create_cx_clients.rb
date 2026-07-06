@@ -4,11 +4,12 @@ class CreateCXClients < ActiveRecord::Migration[8.1]
 
     create_table :cx_clients do |t|
       t.uuid :public_id, null: false, default: "uuid_generate_v4()"
-      t.string :contact_email
+      t.string :public_email, null: false
 
       t.timestamps
 
       t.index :public_id, unique: true
+      t.index :public_email, unique: true
     end
 
     add_column :credentials, :client_id, :uuid
