@@ -2,4 +2,5 @@ en:
   http_errors:
     unprocessable_content:
       amount_below_minimum: "Amounts should be positive"
-      insufficient_funds: "You don't have enough funds to perform this operation"
+      insufficient_funds: "Not enough funds to perform this operation"
+      self_transfer: "Can't transfers to this receiver"

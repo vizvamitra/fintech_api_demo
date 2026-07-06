@@ -18,6 +18,8 @@ module Api
           _fin_ops.initiate_transfer(sender_id: client_id, receiver_id:, amount_cents:)
         rescue ::FinOps::AmountBelowMinimumError
           raise HttpErrors::UnprocessableContentError, :amount_below_minimum
+        rescue ::FinOps::SelfTransferError
+          raise HttpErrors::UnprocessableContentError, :self_transfer
         rescue ::FinOps::InsufficientFundsError, ::Accounting::InsufficientFundsError
           raise HttpErrors::UnprocessableContentError, :insufficient_funds
         end

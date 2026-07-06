@@ -15,11 +15,13 @@ module FinOps
       #
       # @return [FinOps::Transfer]
       # @raise [ActiveRecord::RecordNotFound]
-      # @raise [FinOps::NegativeAmountError]
+      # @raise [FinOps::AmountBelowMinimumError]
+      # @raise [FinOps::SelfTransferError]
       # @raise [FinOps::InsufficientFundsError]
       #
       def call(sender_id:, receiver_id:, amount_cents:)
         raise AmountBelowMinimumError if amount_cents <= 0
+        raise SelfTransferError if sender_id == receiver_id
 
         sender = FinOps::PayerAccount.find_by!(client_id: sender_id)
         receiver = FinOps::PayerAccount.find_by!(client_id: receiver_id)
