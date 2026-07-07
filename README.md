@@ -99,7 +99,17 @@ Failed responses return:
 
 ## Call Stack
 
+### Mutating Requests (`#create`, `#update`, `#destroy`)
+
+Those tend to become complex in terms of the implementation, so maintaining layer boundaries is highly important and the call stack is mandatory the following:
+
 <img src="docs/Call Stack.png">
+
+### Read-Only Requests (`#index`, `#show`)
+
+For simple read-only requests that only involve several model calls, referencing model classes directly in the controller action in tolerable. This helps to avoid boilerplate while typically being extremely cheap to change in the future if needed
+
+For complex read-only requests (e.g., indexing a collection with adjustable filters and sorting), mintaining layer boundaries through action/interface is mandatory. There are no expamples of complex read-only requests in this particular app though
 
 ## Data Model
 
