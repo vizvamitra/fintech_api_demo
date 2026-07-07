@@ -29,10 +29,14 @@ module Api
     def decode_jwt(jwt)
       JWT.decode(
         jwt,
-        Rails.application.credentials.jwt_secret_key!,
+        jwt_public_key,
         true,
-        algorithm: "HS256"
+        algorithm: "RS256"
       ).first
+    end
+
+    def jwt_public_key
+      OpenSSL::PKey.read(Rails.application.credentials.jwt_private_key!).public_key
     end
   end
 end

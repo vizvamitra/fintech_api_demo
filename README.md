@@ -18,7 +18,7 @@ Prerequisites: Ruby from [.ruby-version](.ruby-version), PostgreSQL, and Bundler
 bundle install
 ```
 
-Create local Rails credentials. This creates `config/master.key`; the API also needs `jwt_secret_key` for access-token signing.
+Create local Rails credentials. This creates `config/master.key`; the API also needs an RSA private key for JWT signing.
 
 ```bash
 # If you were not given the matching config/master.key, recreate local credentials.
@@ -26,10 +26,19 @@ rm -f config/credentials.yml.enc
 bin/rails credentials:edit
 ```
 
-Add this value to the credentials file:
+Generate a local private key with:
+
+```bash
+ruby -ropenssl -e 'puts OpenSSL::PKey::RSA.generate(2048)'
+```
+
+Add the generated key to the credentials file:
 
 ```yaml
-jwt_secret_key: <output of bin/rails secret>
+jwt_private_key: |-
+  -----BEGIN RSA PRIVATE KEY-----
+  ...
+  -----END RSA PRIVATE KEY-----
 ```
 
 Prepare the database and run the checks:

@@ -5,8 +5,8 @@ module Api
       AUDIENCE = "whatever"
       EXPIRY_INTERVAL = 1.day
 
-      def initialize(jwt_secret_key: Rails.application.credentials.jwt_secret_key!)
-        @_jwt_secret_key = jwt_secret_key
+      def initialize(jwt_private_key: Rails.application.credentials.jwt_private_key!)
+        @_jwt_private_key = OpenSSL::PKey.read(jwt_private_key)
       end
 
       # @param email [String]
@@ -21,7 +21,7 @@ module Api
 
       private
 
-      attr_reader :_jwt_secret_key
+      attr_reader :_jwt_private_key
 
       def issue_jwt(credentials)
         payload = {
@@ -31,7 +31,7 @@ module Api
           exp: EXPIRY_INTERVAL.from_now.to_i
         }
 
-        JWT.encode(payload, _jwt_secret_key, "HS256")
+        JWT.encode(payload, _jwt_private_key, "RS256")
       end
     end
   end
