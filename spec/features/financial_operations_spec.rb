@@ -16,7 +16,7 @@ RSpec.describe "Financial operations", type: :feature do
     then_first_client_balance_should_be(100)
     and_second_client_balance_should_be(100)
     and_first_client_should_see_outgoing_transfer_to_second_client(amount: 100)
-    and_second_client_should_see_incoming_transfer_from_second_client(amount: 100)
+    and_second_client_should_see_incoming_transfer_from_first_client(amount: 100)
 
     when_second_client_withdraws_funds(amount: 50)
     then_second_client_balance_should_be(50)
@@ -132,7 +132,7 @@ RSpec.describe "Financial operations", type: :feature do
     end
   end
 
-  def and_second_client_should_see_incoming_transfer_from_second_client(amount:)
+  def and_second_client_should_see_incoming_transfer_from_first_client(amount:)
     sign_in(@clients[1]) do
       movements = fetch_money_movements
 
