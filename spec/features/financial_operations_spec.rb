@@ -31,7 +31,7 @@ RSpec.describe "Financial operations", type: :feature do
     Accounting::Interface.new.create_account(
       category: :asset,
       code: "1110",
-      label: "assets:cash:payment-processor-balance"
+      label: "assets:current:payment-processor-receivables"
     )
   end
 

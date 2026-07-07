@@ -1,7 +1,7 @@
 module FinOps
   module Bookkeeping
     class RecordWithdrawal
-      PP_BALANCE_ACCOUNT = "assets:cash:payment-processor-balance"
+      PP_BALANCE_ACCOUNT = "assets:current:payment-processor-receivables"
       REFERENCE_TYPE = "client_withdrawal"
 
       def initialize(accounting: Accounting::Interface.new)

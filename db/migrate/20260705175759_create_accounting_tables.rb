@@ -4,8 +4,8 @@ class CreateAccountingTables < ActiveRecord::Migration[8.1]
       t.uuid :client_id, index: true
       t.integer :category, limit: 2, null: false, index: true
       t.integer :natural_balance, limit: 2, null: false
-      t.string :label, null: false, index: { unique: true } # assets:stripe-balance
-      t.string :code, null: false # 2100
+      t.string :label, null: false, index: { unique: true }
+      t.string :code, null: false
       t.string :owner_ref
 
       t.timestamps
