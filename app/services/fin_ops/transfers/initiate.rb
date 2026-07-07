@@ -26,10 +26,12 @@ module FinOps
         sender = find_payer(sender_id)
         receiver = find_payer(receiver_id)
 
-        balance = read_available_balance(sender)
-        raise InsufficientFundsError if balance < amount_cents
-
         ApplicationRecord.transaction do
+          sender.lock!
+
+          balance = read_available_balance(sender)
+          raise InsufficientFundsError if balance < amount_cents
+
           transfer = create_transfer(sender, receiver, amount_cents)
           reflect_in_accounting(sender, receiver, transfer)
 

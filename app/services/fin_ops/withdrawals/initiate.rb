@@ -3,9 +3,11 @@ module FinOps
     class Initiate
       def initialize(reserve_funds: Bookkeeping::ReserveFundsForWithdrawal.new,
                      record_withdrawal: Bookkeeping::RecordWithdrawal.new,
+                     accounting: Accounting::Interface.new,
                      clients: CX::Interface.new)
         @_reserve_funds = reserve_funds
         @_record_withdrawal = record_withdrawal
+        @_accounting = accounting
         @_clients = clients
       end
 
@@ -15,11 +17,12 @@ module FinOps
       # @return [FinOps::Withdrawal]
       # @raise [ActiveRecord::RecordNotFound]
       # @raise [FinOps::AmountBelowMinimumError]
+      # @raise [FinOps::InsufficientFundsError]
       #
       def call(client_id:, amount_cents:)
         raise AmountBelowMinimumError if amount_cents <= 0
 
-        payer = FinOps::PayerAccount.find_by!(client_id:)
+        payer = find_payer(client_id)
 
         # The real app would probably require the client to set up his withdrawal method
         # first. Then, withdrawal initiation would mean:
@@ -40,6 +43,11 @@ module FinOps
         # this, I wanted to demonstrate fund reservations.
         #
         ApplicationRecord.transaction do
+          payer.lock!
+
+          balance = read_available_balance(payer)
+          raise InsufficientFundsError if balance < amount_cents
+
           withdrawal = create_withdrawal(payer, amount_cents)
           reserve_funds(payer, withdrawal)
           notify_cx_about_money_movement(payer, withdrawal)
@@ -56,7 +64,15 @@ module FinOps
 
       private
 
-      attr_reader :_reserve_funds, :_record_withdrawal, :_clients
+      attr_reader :_reserve_funds, :_record_withdrawal, :_accounting, :_clients
+
+      def find_payer(client_id)
+        FinOps::PayerAccount.find_by!(client_id:)
+      end
+
+      def read_available_balance(sender)
+        _accounting.read_account_balance(label: sender.available_funds_account)
+      end
 
       def create_withdrawal(payer, amount_cents)
         payer.withdrawals.create!(state: :initiated, amount_cents:)
