@@ -63,7 +63,7 @@ All authenticated endpoints expect `Authorization: Bearer <access_token>`.
 | `POST` | `/api/sign_ups` | Create a client from an email. |
 | `POST` | `/api/sign_ins` | Issue a JWT access token for an existing email. |
 | `GET` | `/api/me` | Return the current client and available balance. |
-| `GET` | `/api/cx/client` | Search cleint by public email. |
+| `GET` | `/api/cx/client` | Search client by public email. |
 | `GET` | `/api/cx/money_movements` | List client-visible money movement history. |
 | `POST` | `/api/fin_ops/deposits` | Deposit funds into the current client's account. |
 | `POST` | `/api/fin_ops/withdrawals` | Withdraw funds from the current client's account. |
@@ -101,15 +101,15 @@ Failed responses return:
 
 ### Mutating Requests (`#create`, `#update`, `#destroy`)
 
-Those tend to become complex in terms of the implementation, so maintaining layer boundaries is highly important and the call stack is mandatory the following:
+Those tend to become complex in terms of the implementation, so maintaining layer boundaries is highly important and the following call stack is mandatory
 
 <img src="docs/Call Stack.png">
 
 ### Read-Only Requests (`#index`, `#show`)
 
-For simple read-only requests that only involve several model calls, referencing model classes directly in the controller action in tolerable. This helps to avoid boilerplate while typically being extremely cheap to change in the future if needed
+For simple read-only requests that only involve several model calls, referencing model classes directly in the controller action is tolerable. This helps to avoid boilerplate while typically being extremely cheap to change in the future if needed
 
-For complex read-only requests (e.g., indexing a collection with adjustable filters and sorting), mintaining layer boundaries through action/interface is mandatory. There are no expamples of complex read-only requests in this particular app though
+For complex read-only requests (e.g., indexing a collection with adjustable filters and sorting), maintaining layer boundaries through action/interface is mandatory. There are no examples of complex read-only requests in this particular app though
 
 ## Data Model
 
