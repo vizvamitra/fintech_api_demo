@@ -46,8 +46,8 @@ module FinOps
 
           # Withdrawal magically settles
 
-          settle_withdrawal(withdrawal, Time.current)
-          record_withdrawal(payer, withdrawal)
+          mark_settled(withdrawal)
+          transfer_funds(payer, withdrawal)
           notify_cx_about_money_movement(payer, withdrawal)
 
           withdrawal
@@ -66,11 +66,11 @@ module FinOps
         _reserve_funds.call(payer:, withdrawal:)
       end
 
-      def settle_withdrawal(withdrawal, settled_at)
-        withdrawal.update!(state: :settled, settled_at:)
+      def mark_settled(withdrawal)
+        withdrawal.update!(state: :settled, settled_at: Time.current)
       end
 
-      def record_withdrawal(payer, withdrawal)
+      def transfer_funds(payer, withdrawal)
         _record_withdrawal.call(payer:, withdrawal:)
       end
 

@@ -40,8 +40,7 @@ module FinOps
         #
         ApplicationRecord.transaction do
           deposit = create_deposit(payer, amount_cents)
-
-          record_deposit(payer, deposit)
+          reflect_in_accounting(payer, deposit)
 
           notify_cx_about_money_movement(payer, deposit)
 
@@ -57,7 +56,7 @@ module FinOps
         payer.deposits.create!(amount_cents:)
       end
 
-      def record_deposit(payer, deposit)
+      def reflect_in_accounting(payer, deposit)
         _record_deposit.call(payer:, deposit:)
       end
 

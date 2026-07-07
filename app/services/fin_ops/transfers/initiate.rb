@@ -23,15 +23,15 @@ module FinOps
         raise AmountBelowMinimumError if amount_cents <= 0
         raise SelfTransferError if sender_id == receiver_id
 
-        sender = FinOps::PayerAccount.find_by!(client_id: sender_id)
-        receiver = FinOps::PayerAccount.find_by!(client_id: receiver_id)
+        sender = find_payer(sender_id)
+        receiver = find_payer(receiver_id)
 
         balance = read_available_balance(sender)
         raise InsufficientFundsError if balance < amount_cents
 
         ApplicationRecord.transaction do
           transfer = create_transfer(sender, receiver, amount_cents)
-          record_transfer(sender, receiver, transfer)
+          reflect_in_accounting(sender, receiver, transfer)
 
           notify_cx_about_money_movement(sender, :outgoing_transfer, transfer)
           notify_cx_about_money_movement(receiver, :incoming_transfer, transfer)
@@ -44,6 +44,10 @@ module FinOps
 
       attr_reader :_record_transfer, :_accounting, :_clients
 
+      def find_payer(client_id)
+        FinOps::PayerAccount.find_by!(client_id:)
+      end
+
       def read_available_balance(sender)
         _accounting.read_account_balance(label: sender.available_funds_account)
       end
@@ -52,7 +56,7 @@ module FinOps
         Transfer.create!(sender:, receiver:, amount_cents:)
       end
 
-      def record_transfer(sender, receiver, transfer)
+      def reflect_in_accounting(sender, receiver, transfer)
         _record_transfer.call(sender:, receiver:, transfer:)
       end
 
