@@ -127,7 +127,8 @@ RSpec.describe "Financial operations", type: :feature do
       expect(movements).to include(include(
         "kind" => "outgoing_transfer",
         "reference" => @transfer["public_id"],
-        "amount_cents" => amount * 100
+        "amount_cents" => amount * 100,
+        "sender_email" => nil
       ))
     end
   end
@@ -140,7 +141,8 @@ RSpec.describe "Financial operations", type: :feature do
       expect(movements).to include(include(
         "kind" => "incoming_transfer",
         "reference" => @transfer["public_id"],
-        "amount_cents" => amount * 100
+        "amount_cents" => amount * 100,
+        "sender_email" => @clients[0].public_email
       ))
     end
   end

@@ -35,8 +35,8 @@ module FinOps
           transfer = create_transfer(sender, receiver, amount_cents)
           reflect_in_accounting(sender, receiver, transfer)
 
-          notify_cx_about_money_movement(sender, :outgoing_transfer, transfer)
-          notify_cx_about_money_movement(receiver, :incoming_transfer, transfer)
+          notify_cx_about_outgoing_transfer(transfer, sender)
+          notify_cx_about_incoming_transfer(transfer, receiver, sender)
 
           transfer
         end
@@ -62,16 +62,31 @@ module FinOps
         _record_transfer.call(sender:, receiver:, transfer:)
       end
 
-      def notify_cx_about_money_movement(payer, kind, transfer)
+      def notify_cx_about_outgoing_transfer(transfer, sender)
         _clients.store_money_movement(
-          client_id: payer.client_id,
-          kind:,
+          client_id: sender.client_id,
+          kind: :outgoing_transfer,
+          **money_movement_attributes(transfer)
+        )
+      end
+
+      def notify_cx_about_incoming_transfer(transfer, receiver, sender)
+        _clients.store_money_movement(
+          client_id: receiver.client_id,
+          kind: :incoming_transfer,
+          sender_id: sender.client_id,
+          **money_movement_attributes(transfer)
+        )
+      end
+
+      def money_movement_attributes(transfer)
+        {
           reference: transfer.public_id,
           state: :settled,
           amount_cents: transfer.amount_cents,
           initiated_at: transfer.created_at,
           resolved_at: transfer.created_at
-        )
+        }
       end
     end
   end
