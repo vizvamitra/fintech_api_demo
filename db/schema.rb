@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_07_152000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_05_175759) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "uuid-ossp"
@@ -72,7 +72,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_152000) do
   end
 
   create_table "cx_money_movements", force: :cascade do |t|
-    t.integer "amount_cents", null: false
+    t.bigint "amount_cents", null: false
     t.bigint "client_id", null: false
     t.datetime "created_at", null: false
     t.string "error"
@@ -91,7 +91,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_152000) do
   end
 
   create_table "fin_ops_deposits", force: :cascade do |t|
-    t.integer "amount_cents", null: false
+    t.bigint "amount_cents", null: false
     t.datetime "created_at", null: false
     t.bigint "payer_id", null: false
     t.uuid "public_id", default: -> { "uuid_generate_v4()" }, null: false
@@ -111,7 +111,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_152000) do
   end
 
   create_table "fin_ops_transfers", force: :cascade do |t|
-    t.integer "amount_cents", null: false
+    t.bigint "amount_cents", null: false
     t.datetime "created_at", null: false
     t.uuid "public_id", default: -> { "uuid_generate_v4()" }, null: false
     t.bigint "receiver_id", null: false
@@ -122,12 +122,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_152000) do
   end
 
   create_table "fin_ops_withdrawals", force: :cascade do |t|
-    t.integer "amount_cents", null: false
+    t.bigint "amount_cents", null: false
     t.datetime "created_at", null: false
     t.bigint "payer_id", null: false
     t.uuid "public_id", default: -> { "uuid_generate_v4()" }, null: false
     t.datetime "settled_at"
-    t.integer "state", default: 1, null: false
+    t.integer "state", limit: 2, default: 1, null: false
     t.datetime "updated_at", null: false
     t.index ["payer_id"], name: "index_fin_ops_withdrawals_on_payer_id"
     t.index ["public_id"], name: "index_fin_ops_withdrawals_on_public_id", unique: true
