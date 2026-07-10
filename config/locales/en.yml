@@ -1,6 +1,7 @@
 en:
   http_errors:
     unprocessable_content:
-      amount_below_minimum: "Amounts should be positive"
+      amount_out_of_range: "Amount is out of range"
+      amount_invalid: "Amounts should be an integer"
       insufficient_funds: "Not enough funds to perform this operation"
       self_transfer: "Can't transfers to this receiver"

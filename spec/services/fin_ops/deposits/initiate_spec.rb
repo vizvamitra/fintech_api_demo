@@ -2,15 +2,19 @@ require "rails_helper"
 
 RSpec.describe FinOps::Deposits::Initiate do
   subject(:initiate) do
-    described_class.new(record_deposit:, clients:).call(client_id:, amount_cents:)
+    described_class
+      .new(record_deposit:, clients:, min_amount:, max_amount:)
+      .call(client_id:, amount_cents:)
   end
 
   let(:record_deposit) { instance_spy("FinOps::Bookkeeping::RecordDeposit") }
   let(:clients) { instance_spy("CX::Interface") }
 
   let!(:payer) { create(:fin_ops_payer_account) }
+  let(:min_amount) { 100 }
+  let(:max_amount) { 100_00 }
 
-  let(:amount_cents) { 100_00 }
+  let(:amount_cents) { 50_00 }
   let(:client_id) { payer.client_id }
   let(:record_deposit_response) { ->(*) { nil } }
 
@@ -36,9 +40,14 @@ RSpec.describe FinOps::Deposits::Initiate do
     )
   end
 
-  context "when amount is negative" do
-    let(:amount_cents) { -100_00 }
-    it { expect { initiate }.to raise_error(FinOps::AmountBelowMinimumError) }
+  context "when amount is below lower limit" do
+    let(:amount_cents) { 99 }
+    it { expect { initiate }.to raise_error(FinOps::AmountOutOfRangeError) }
+  end
+
+  context "when amount is above upper limit" do
+    let(:amount_cents) { 100_01 }
+    it { expect { initiate }.to raise_error(FinOps::AmountOutOfRangeError) }
   end
 
   context "when payer account doesn't exist" do

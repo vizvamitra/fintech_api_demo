@@ -14,9 +14,13 @@ module Api
         # @raise [HttpErrors::UnprocessableContentError]
         #
         def call(client_id:, amount_cents:)
+          validate(amount_cents)
+
           _fin_ops.initiate_withdrawal(client_id:, amount_cents:)
-        rescue ::FinOps::AmountBelowMinimumError
-          raise HttpErrors::UnprocessableContentError, :amount_below_minimum
+        rescue ::FinOps::AmountInvalidError
+          raise HttpErrors::UnprocessableContentError, :amount_invlid
+        rescue ::FinOps::AmountOutOfRangeError
+          raise HttpErrors::UnprocessableContentError, :amount_out_of_range
         rescue ::FinOps::InsufficientFundsError, ::Accounting::InsufficientFundsError
           raise HttpErrors::UnprocessableContentError, :insufficient_funds
         end
@@ -24,6 +28,11 @@ module Api
         private
 
         attr_reader :_fin_ops
+
+        def validate(amount_cents)
+          return if amount_cents.integer?
+          raise HttpErrors::UnprocessableContentError, :amount_invalid
+        end
       end
     end
   end

@@ -2,11 +2,15 @@ module FinOps
   module Transfers
     class Initiate
       def initialize(record_transfer: Bookkeeping::RecordTransfer.new,
+                     min_amount: Rails.configuration.x.fin_ops.min_transfer_amount,
+                     max_amount: Rails.configuration.x.fin_ops.max_transfer_amount,
                      accounting: Accounting::Interface.new,
                      clients: CX::Interface.new)
         @_record_transfer = record_transfer
         @_accounting = accounting
         @_clients = clients
+        @_min_amount = min_amount
+        @_max_amount = max_amount
       end
 
       # @param sender_id [UUID]
@@ -15,13 +19,13 @@ module FinOps
       #
       # @return [FinOps::Transfer]
       # @raise [ActiveRecord::RecordNotFound]
-      # @raise [FinOps::AmountBelowMinimumError]
       # @raise [FinOps::SelfTransferError]
+      # @raise [FinOps::AmountOutOfRangeError]
       # @raise [FinOps::InsufficientFundsError]
       #
       def call(sender_id:, receiver_id:, amount_cents:)
-        raise AmountBelowMinimumError if amount_cents <= 0
         raise SelfTransferError if sender_id == receiver_id
+        raise AmountOutOfRangeError unless (_min_amount.._max_amount).cover?(amount_cents)
 
         sender = find_payer(sender_id)
         receiver = find_payer(receiver_id)
@@ -44,7 +48,7 @@ module FinOps
 
       private
 
-      attr_reader :_record_transfer, :_accounting, :_clients
+      attr_reader :_record_transfer, :_min_amount, :_max_amount, :_accounting, :_clients
 
       def find_payer(client_id)
         FinOps::PayerAccount.find_by!(client_id:)

@@ -1,6 +1,7 @@
 module FinOps
   Error = Class.new(StandardError)
-  AmountBelowMinimumError = Class.new(Error)
+  AmountInvalidError = Class.new(Error)
+  AmountOutOfRangeError = Class.new(Error)
   SelfTransferError = Class.new(Error)
   InsufficientFundsError = Class.new(Error)
 

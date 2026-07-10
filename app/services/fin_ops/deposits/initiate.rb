@@ -2,8 +2,12 @@ module FinOps
   module Deposits
     class Initiate
       def initialize(record_deposit: Bookkeeping::RecordDeposit.new,
+                     min_amount: Rails.configuration.x.fin_ops.min_deposit_amount_cents,
+                     max_amount: Rails.configuration.x.fin_ops.max_deposit_amount_cents,
                      clients: CX::Interface.new)
         @_record_deposit = record_deposit
+        @_min_amount = min_amount
+        @_max_amount = max_amount
         @_clients = clients
       end
 
@@ -12,10 +16,10 @@ module FinOps
       #
       # @return [FinOps::Deposit]
       # @raise [ActiveRecord::RecordNotFound]
-      # @raise [FinOps::AmountBelowMinimumError]
+      # @raise [FinOps::AmountOutOfRangeError]
       #
       def call(client_id:, amount_cents:)
-        raise AmountBelowMinimumError if amount_cents <= 0
+        raise AmountOutOfRangeError unless (_min_amount.._max_amount).cover?(amount_cents)
 
         payer = FinOps::PayerAccount.find_by!(client_id:)
 
@@ -50,7 +54,7 @@ module FinOps
 
       private
 
-      attr_reader :_record_deposit, :_clients
+      attr_reader :_record_deposit, :_clients, :_min_amount, :_max_amount
 
       def create_deposit(payer, amount_cents)
         payer.deposits.create!(amount_cents:)

@@ -3,10 +3,12 @@ module FinOps
     class Initiate
       def initialize(reserve_funds: Bookkeeping::ReserveFundsForWithdrawal.new,
                      record_withdrawal: Bookkeeping::RecordWithdrawal.new,
+                     min_amount: Rails.configuration.x.fin_ops.min_withdrawal_amount_cents,
                      accounting: Accounting::Interface.new,
                      clients: CX::Interface.new)
         @_reserve_funds = reserve_funds
         @_record_withdrawal = record_withdrawal
+        @_min_amount = min_amount
         @_accounting = accounting
         @_clients = clients
       end
@@ -16,11 +18,11 @@ module FinOps
       #
       # @return [FinOps::Withdrawal]
       # @raise [ActiveRecord::RecordNotFound]
-      # @raise [FinOps::AmountBelowMinimumError]
+      # @raise [FinOps::AmountOutOfRangeError]
       # @raise [FinOps::InsufficientFundsError]
       #
       def call(client_id:, amount_cents:)
-        raise AmountBelowMinimumError if amount_cents <= 0
+        raise AmountOutOfRangeError if amount_cents < _min_amount
 
         payer = find_payer(client_id)
 
@@ -64,7 +66,8 @@ module FinOps
 
       private
 
-      attr_reader :_reserve_funds, :_record_withdrawal, :_accounting, :_clients
+      attr_reader :_reserve_funds, :_record_withdrawal, :_min_amount, :_accounting,
+                  :_clients
 
       def find_payer(client_id)
         FinOps::PayerAccount.find_by!(client_id:)
