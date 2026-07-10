@@ -1,22 +1,15 @@
 module Api
   class MeController < ApiController
     def show
-      client = ::CX::Client.public_find(current_credentials.client_id)
-      payer = ::FinOps::PayerAccount.find_by!(client_id: client.public_id)
-
-      balance = accounting.read_account_balance(label: payer.available_funds_account)
-
-      render json: serialize(client, balance)
+      result = Api::Me::Show.new.call(client_id: current_credentials.client_id)
+      render json: serialize(result)
     end
 
     private
 
-    def accounting
-      ::Accounting::Interface.new
-    end
-
-    def serialize(client, balance)
-      CurrentClientSerializer.new(client, params: { balance_cents: balance })
+    def serialize(result)
+      result => {client:, balance_cents:}
+      CurrentClientSerializer.new(client, params: { balance_cents: })
     end
   end
 end
