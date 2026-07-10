@@ -8,6 +8,8 @@ module CX
       # @param public_email [String]
       #
       # @return [CX::Client]
+      # @raise [CX::EmailTakenError]
+      # @raise [ActiveRecord::RecordInvalid]
       #
       def call(public_email:)
         ApplicationRecord.transaction do
@@ -16,6 +18,8 @@ module CX
 
           client
         end
+      rescue ActiveRecord::RecordNotUnique
+        raise EmailTakenError
       end
 
       private

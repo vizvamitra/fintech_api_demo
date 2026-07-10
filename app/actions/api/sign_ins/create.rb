@@ -15,7 +15,7 @@ module Api
       # @raise [ActiveRecord::RecordNotFound]
       #
       def call(email:)
-        credentials = Credentials.find_by!(email:)
+        credentials = Credentials.find_by!(email: email.downcase)
         issue_jwt(credentials)
       end
 

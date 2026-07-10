@@ -1,6 +1,7 @@
 en:
   http_errors:
     unprocessable_content:
+      email_is_taken: "The email you've entered is already taken"
       amount_out_of_range: "Amount is out of range"
       amount_invalid: "Amounts should be an integer"
       insufficient_funds: "Not enough funds to perform this operation"
