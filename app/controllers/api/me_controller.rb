@@ -8,7 +8,7 @@ module Api
     private
 
     def serialize(result)
-      result => {client:, balance_cents:}
+      result => { client:, balance_cents: }
       CurrentClientSerializer.new(client, params: { balance_cents: })
     end
   end

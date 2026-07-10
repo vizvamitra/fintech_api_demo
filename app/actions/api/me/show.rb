@@ -15,7 +15,7 @@ module Api
 
         balance = read_balance(payer)
 
-        {client:, balance_cents: balance}
+        { client:, balance_cents: balance }
       end
 
       attr_reader :_accounting
