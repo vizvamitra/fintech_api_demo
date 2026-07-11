@@ -1,7 +1,7 @@
 module CX
   class Interface < Subsystems::Interface
-    def create_client(**args)
-      with_logging { CX::Clients::Create.new.call(**args) }
+    def create_customer(**args)
+      with_logging { CX::Customers::Create.new.call(**args) }
     end
 
     def store_money_movement(**args)

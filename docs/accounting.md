@@ -8,46 +8,46 @@
        └─ 1110 assets:current:payment-processor-receivables
 
 2000 Liabilities
-  └─ 2100 Client Deposits
-       └─ 2110 liabilities:client-deposits:xxxx:available
-       └─ 2120 liabilities:client-deposits:xxxx:reserved
+  └─ 2100 Customer Deposits
+       └─ 2110 liabilities:customer-deposits:xxxx:available
+       └─ 2120 liabilities:customer-deposits:xxxx:reserved
 ```
 
-I intentionally simplified the accounting chart to the bare essentials for the task. In a production system, there would be more account categories, and client wallet balances would usually be maintained in a dedicated subledger, with summarized activity posted into the company general ledger
+I intentionally simplified the accounting chart to the bare essentials for the task. In a production system, there would be more account categories, and customer wallet balances would usually be maintained in a dedicated subledger, with summarized activity posted into the company general ledger
 
 ## Operation Plans
 
 ### 1. Fund Reservation
 
 ```
-DR  liabilities:client-deposits:xxxx:available    1000  (-$10 to balance)
-CR  liabilities:client-deposits:xxxx:reserved     1000  (+$10 to balance)
+DR  liabilities:customer-deposits:xxxx:available    1000  (-$10 to balance)
+CR  liabilities:customer-deposits:xxxx:reserved     1000  (+$10 to balance)
 ```
 
-### 2. Client Deposit
+### 2. Customer Deposit
 
 ```
 DR  assets:current:payment-processor-receivables  1000  (+$10 to balance)
-CR  liabilities:client-deposits:xxxx:available    1000  (+$10 to balance)
+CR  liabilities:customer-deposits:xxxx:available    1000  (+$10 to balance)
 ```
 
-### 3. Client Withdrawal
+### 3. Customer Withdrawal
 
 ```
-DR  liabilities:client-deposits:xxxx:reserved     1000  (-$10 to balance)
+DR  liabilities:customer-deposits:xxxx:reserved     1000  (-$10 to balance)
 CR  assets:current:payment-processor-receivables  1000  (-$10 to balance)
 ```
 
-### 4. Transfer Between Clients
+### 4. Transfer Between Customers
 
 ```
-DR  liabilities:client-deposits:xxxx:available    1000  (-$10 to balance)
-CR  liabilities:client-deposits:yyyy:available    1000  (+$10 to balance)
+DR  liabilities:customer-deposits:xxxx:available    1000  (-$10 to balance)
+CR  liabilities:customer-deposits:yyyy:available    1000  (+$10 to balance)
 ```
 
 ### 5. Reservation Release
 
 ```
-DR  liabilities:client-deposits:xxxx:reserved     1000  (-$10 to balance)
-CR  liabilities:client-deposits:xxxx:available    1000  (+$10 to balance)
+DR  liabilities:customer-deposits:xxxx:reserved     1000  (-$10 to balance)
+CR  liabilities:customer-deposits:xxxx:available    1000  (+$10 to balance)
 ```

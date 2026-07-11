@@ -5,7 +5,7 @@ Rails.application.routes.draw do
     resource :me, only: %i[show], controller: "me"
 
     namespace "cx" do
-      resource :client, only: %i[show]
+      resource :customer, only: %i[show]
       resources :money_movements, only: %i[index]
     end
 

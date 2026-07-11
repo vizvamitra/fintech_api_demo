@@ -2,7 +2,7 @@ module FinOps
   module Bookkeeping
     class RecordDeposit
       PP_BALANCE_ACCOUNT = "assets:current:payment-processor-receivables"
-      REFERENCE_TYPE = "client_deposit"
+      REFERENCE_TYPE = "customer_deposit"
 
       def initialize(accounting: Accounting::Interface.new)
         @_accounting = accounting
@@ -36,8 +36,8 @@ module FinOps
 
       def entry_description(payer, deposit)
         [
-          "Client Deposit #{deposit.public_id}",
-          "Client #{payer.client_id}",
+          "Customer Deposit #{deposit.public_id}",
+          "Customer #{payer.customer_id}",
           "$#{(deposit.amount_cents.to_f / 100).round(2)}"
         ].join(" - ")
       end

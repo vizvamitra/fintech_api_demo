@@ -6,7 +6,7 @@ module Api
           @_fin_ops = fin_ops
         end
 
-        # @param client_id [UUID]
+        # @param customer_id [UUID]
         # @param receiver_id [UUID]
         # @param amount_cents [Integer]
         #
@@ -14,10 +14,10 @@ module Api
         # @raise [ActiveRecord::RecordNotFound]
         # @raise [HttpErrors::UnprocessableContentError]
         #
-        def call(client_id:, receiver_id:, amount_cents:)
+        def call(customer_id:, receiver_id:, amount_cents:)
           validate(amount_cents)
 
-          _fin_ops.initiate_transfer(sender_id: client_id, receiver_id:, amount_cents:)
+          _fin_ops.initiate_transfer(sender_id: customer_id, receiver_id:, amount_cents:)
         rescue ::FinOps::AmountOutOfRangeError
           raise HttpErrors::UnprocessableContentError, :amount_out_of_range
         rescue ::FinOps::AmountInvalidError

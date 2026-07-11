@@ -1,5 +1,5 @@
 module CX
-  class Client < ApplicationRecord
+  class Customer < ApplicationRecord
     has_many :money_movements, dependent: :destroy
 
     validates :public_email, presence: true

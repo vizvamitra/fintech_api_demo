@@ -5,15 +5,15 @@ module FinOps
                      record_withdrawal: Bookkeeping::RecordWithdrawal.new,
                      min_amount: Rails.configuration.x.fin_ops.min_withdrawal_amount_cents,
                      accounting: Accounting::Interface.new,
-                     clients: CX::Interface.new)
+                     customers: CX::Interface.new)
         @_reserve_funds = reserve_funds
         @_record_withdrawal = record_withdrawal
         @_min_amount = min_amount
         @_accounting = accounting
-        @_clients = clients
+        @_customers = customers
       end
 
-      # @param client_id [UUID]
+      # @param customer_id [UUID]
       # @param amount_cents [Integer]
       #
       # @return [FinOps::Withdrawal]
@@ -21,12 +21,12 @@ module FinOps
       # @raise [FinOps::AmountOutOfRangeError]
       # @raise [FinOps::InsufficientFundsError]
       #
-      def call(client_id:, amount_cents:)
+      def call(customer_id:, amount_cents:)
         raise AmountOutOfRangeError if amount_cents < _min_amount
 
-        payer = find_payer(client_id)
+        payer = find_payer(customer_id)
 
-        # The real app would probably require the client to set up his withdrawal method
+        # The real app would probably require the customer to set up his withdrawal method
         # first. Then, withdrawal initiation would mean:
         #
         # - creating a withdrawal record
@@ -67,10 +67,10 @@ module FinOps
       private
 
       attr_reader :_reserve_funds, :_record_withdrawal, :_min_amount, :_accounting,
-                  :_clients
+                  :_customers
 
-      def find_payer(client_id)
-        FinOps::PayerAccount.find_by!(client_id:)
+      def find_payer(customer_id)
+        FinOps::PayerAccount.find_by!(customer_id:)
       end
 
       def read_available_balance(sender)
@@ -94,8 +94,8 @@ module FinOps
       end
 
       def notify_cx_about_money_movement(payer, withdrawal)
-        _clients.store_money_movement(
-          client_id: payer.client_id,
+        _customers.store_money_movement(
+          customer_id: payer.customer_id,
           kind: :withdrawal,
           reference: withdrawal.public_id,
           state: withdrawal.initiated? ? :pending : :settled,

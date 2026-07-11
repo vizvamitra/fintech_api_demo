@@ -11,7 +11,7 @@ module Api
       def create_params
         {
           **params.require(:deposit).permit(:amount_cents),
-          client_id: current_credentials.client_id
+          customer_id: current_credentials.customer_id
         }
       end
     end

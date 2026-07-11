@@ -1,5 +1,5 @@
 class Credentials < ApplicationRecord
-  belongs_to :client, class_name: "CX::Client", primary_key: :public_id
+  belongs_to :customer, class_name: "CX::Customer", primary_key: :public_id
 
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: true
 end

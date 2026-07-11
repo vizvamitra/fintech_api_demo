@@ -17,15 +17,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_175759) do
 
   create_table "accounting_accounts", force: :cascade do |t|
     t.integer "category", limit: 2, null: false
-    t.uuid "client_id"
     t.string "code", null: false
     t.datetime "created_at", null: false
+    t.uuid "customer_id"
     t.string "label", null: false
     t.integer "natural_balance", limit: 2, null: false
     t.string "owner_ref"
     t.datetime "updated_at", null: false
     t.index ["category"], name: "index_accounting_accounts_on_category"
-    t.index ["client_id"], name: "index_accounting_accounts_on_client_id"
+    t.index ["customer_id"], name: "index_accounting_accounts_on_customer_id"
     t.index ["label"], name: "index_accounting_accounts_on_label", unique: true
     t.check_constraint "natural_balance = ANY (ARRAY[1, '-1'::integer])"
   end
@@ -54,27 +54,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_175759) do
   end
 
   create_table "credentials", force: :cascade do |t|
-    t.uuid "client_id"
     t.datetime "created_at", null: false
+    t.uuid "customer_id"
     t.string "email", null: false
     t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_credentials_on_client_id", unique: true
+    t.index ["customer_id"], name: "index_credentials_on_customer_id", unique: true
     t.index ["email"], name: "index_credentials_on_email", unique: true
   end
 
-  create_table "cx_clients", force: :cascade do |t|
+  create_table "cx_customers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "public_email", null: false
     t.uuid "public_id", default: -> { "uuid_generate_v4()" }, null: false
     t.datetime "updated_at", null: false
-    t.index ["public_email"], name: "index_cx_clients_on_public_email", unique: true
-    t.index ["public_id"], name: "index_cx_clients_on_public_id", unique: true
+    t.index ["public_email"], name: "index_cx_customers_on_public_email", unique: true
+    t.index ["public_id"], name: "index_cx_customers_on_public_id", unique: true
   end
 
   create_table "cx_money_movements", force: :cascade do |t|
     t.bigint "amount_cents", null: false
-    t.bigint "client_id", null: false
     t.datetime "created_at", null: false
+    t.bigint "customer_id", null: false
     t.string "error"
     t.datetime "initiated_at", null: false
     t.integer "kind", limit: 2, null: false
@@ -83,10 +83,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_175759) do
     t.bigint "sender_id"
     t.integer "state", limit: 2, default: 1, null: false
     t.datetime "updated_at", null: false
-    t.index ["client_id", "initiated_at"], name: "index_cx_money_movements_on_client_id_and_initiated_at"
-    t.index ["client_id", "kind"], name: "index_cx_money_movements_on_client_id_and_kind"
-    t.index ["client_id", "reference"], name: "index_cx_money_movements_on_client_id_and_reference", unique: true
-    t.index ["client_id"], name: "index_cx_money_movements_on_client_id"
+    t.index ["customer_id", "initiated_at"], name: "index_cx_money_movements_on_customer_id_and_initiated_at"
+    t.index ["customer_id", "kind"], name: "index_cx_money_movements_on_customer_id_and_kind"
+    t.index ["customer_id", "reference"], name: "index_cx_money_movements_on_customer_id_and_reference", unique: true
+    t.index ["customer_id"], name: "index_cx_money_movements_on_customer_id"
     t.index ["sender_id"], name: "index_cx_money_movements_on_sender_id"
   end
 
@@ -101,12 +101,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_175759) do
 
   create_table "fin_ops_payer_accounts", force: :cascade do |t|
     t.string "available_funds_account", null: false
-    t.uuid "client_id", null: false
     t.datetime "created_at", null: false
+    t.uuid "customer_id", null: false
     t.string "reserved_funds_account", null: false
     t.datetime "updated_at", null: false
     t.index ["available_funds_account"], name: "index_fin_ops_payer_accounts_on_available_funds_account", unique: true
-    t.index ["client_id"], name: "index_fin_ops_payer_accounts_on_client_id", unique: true
+    t.index ["customer_id"], name: "index_fin_ops_payer_accounts_on_customer_id", unique: true
     t.index ["reserved_funds_account"], name: "index_fin_ops_payer_accounts_on_reserved_funds_account", unique: true
   end
 

@@ -3,24 +3,24 @@ require "rails_helper"
 RSpec.describe FinOps::Deposits::Initiate do
   subject(:initiate) do
     described_class
-      .new(record_deposit:, clients:, min_amount:, max_amount:)
-      .call(client_id:, amount_cents:)
+      .new(record_deposit:, customers:, min_amount:, max_amount:)
+      .call(customer_id:, amount_cents:)
   end
 
   let(:record_deposit) { instance_spy("FinOps::Bookkeeping::RecordDeposit") }
-  let(:clients) { instance_spy("CX::Interface") }
+  let(:customers) { instance_spy("CX::Interface") }
 
   let!(:payer) { create(:fin_ops_payer_account) }
   let(:min_amount) { 100 }
   let(:max_amount) { 100_00 }
 
   let(:amount_cents) { 50_00 }
-  let(:client_id) { payer.client_id }
+  let(:customer_id) { payer.customer_id }
   let(:record_deposit_response) { ->(*) { nil } }
 
   before do
     allow(record_deposit).to receive(:call, &record_deposit_response)
-    allow(clients).to receive(:store_money_movement)
+    allow(customers).to receive(:store_money_movement)
   end
 
   it "on success" do
@@ -29,8 +29,8 @@ RSpec.describe FinOps::Deposits::Initiate do
       .and have_attributes(payer:, amount_cents:)
 
     expect(record_deposit).to have_received(:call).with(payer:, deposit: initiate)
-    expect(clients).to have_received(:store_money_movement).with(
-      client_id:,
+    expect(customers).to have_received(:store_money_movement).with(
+      customer_id:,
       kind: :deposit,
       reference: initiate.public_id,
       state: :settled,
@@ -51,7 +51,7 @@ RSpec.describe FinOps::Deposits::Initiate do
   end
 
   context "when payer account doesn't exist" do
-    let(:client_id) { SecureRandom.uuid }
+    let(:customer_id) { SecureRandom.uuid }
     it { expect { initiate }.to raise_error(ActiveRecord::RecordNotFound) }
   end
 

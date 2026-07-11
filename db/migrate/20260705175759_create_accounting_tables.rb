@@ -1,7 +1,7 @@
 class CreateAccountingTables < ActiveRecord::Migration[8.1]
   def change
     create_table :accounting_accounts do |t|
-      t.uuid :client_id, index: true
+      t.uuid :customer_id, index: true
       t.integer :category, limit: 2, null: false, index: true
       t.integer :natural_balance, limit: 2, null: false
       t.string :label, null: false, index: { unique: true }

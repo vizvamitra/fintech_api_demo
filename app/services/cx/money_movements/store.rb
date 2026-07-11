@@ -3,7 +3,7 @@ module CX
     class Store
       ATTRIBUTES = %i[amount_cents state initiated_at resolved_at error]
 
-      # @param client_id [UUID]
+      # @param customer_id [UUID]
       # @param kind [Symbol]
       # @param reference [UUID]
       # @param sender_id [UUID, nil]
@@ -16,14 +16,14 @@ module CX
       #
       # @return [CX::MoneyMovement]
       #
-      def call(client_id:, kind:, reference:, sender_id: nil, **attributes)
-        client = Client.public_find(client_id)
-        sender = Client.public_find(sender_id) if sender_id
+      def call(customer_id:, kind:, reference:, sender_id: nil, **attributes)
+        customer = Customer.public_find(customer_id)
+        sender = Customer.public_find(sender_id) if sender_id
 
-        client
+        customer
           .money_movements
           .create_with(attributes.slice(*ATTRIBUTES))
-          .create_or_find_by(client_id: client.id, kind:, reference:)
+          .create_or_find_by(customer_id: customer.id, kind:, reference:)
           .update!(sender:, **attributes.slice(*ATTRIBUTES))
       end
     end

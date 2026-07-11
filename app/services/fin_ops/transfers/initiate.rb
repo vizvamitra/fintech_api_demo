@@ -5,10 +5,10 @@ module FinOps
                      min_amount: Rails.configuration.x.fin_ops.min_transfer_amount,
                      max_amount: Rails.configuration.x.fin_ops.max_transfer_amount,
                      accounting: Accounting::Interface.new,
-                     clients: CX::Interface.new)
+                     customers: CX::Interface.new)
         @_record_transfer = record_transfer
         @_accounting = accounting
-        @_clients = clients
+        @_customers = customers
         @_min_amount = min_amount
         @_max_amount = max_amount
       end
@@ -48,10 +48,10 @@ module FinOps
 
       private
 
-      attr_reader :_record_transfer, :_min_amount, :_max_amount, :_accounting, :_clients
+      attr_reader :_record_transfer, :_min_amount, :_max_amount, :_accounting, :_customers
 
-      def find_payer(client_id)
-        FinOps::PayerAccount.find_by!(client_id:)
+      def find_payer(customer_id)
+        FinOps::PayerAccount.find_by!(customer_id:)
       end
 
       def read_available_balance(sender)
@@ -67,18 +67,18 @@ module FinOps
       end
 
       def notify_cx_about_outgoing_transfer(transfer, sender)
-        _clients.store_money_movement(
-          client_id: sender.client_id,
+        _customers.store_money_movement(
+          customer_id: sender.customer_id,
           kind: :outgoing_transfer,
           **money_movement_attributes(transfer)
         )
       end
 
       def notify_cx_about_incoming_transfer(transfer, receiver, sender)
-        _clients.store_money_movement(
-          client_id: receiver.client_id,
+        _customers.store_money_movement(
+          customer_id: receiver.customer_id,
           kind: :incoming_transfer,
-          sender_id: sender.client_id,
+          sender_id: sender.customer_id,
           **money_movement_attributes(transfer)
         )
       end

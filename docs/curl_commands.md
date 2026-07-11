@@ -2,9 +2,9 @@
 
 This list provides a complete scenario:
 
-- Sign up twice, creating two clients: "sender" and "receiver"
+- Sign up twice, creating two customers: "sender" and "receiver"
 - Fetch access tokens for both
-- Fetch client records to check balances
+- Fetch customer records to check balances
 - As sender, deposit $200
 - As sender, search receiver by email to get public ID
 - As sender, transfer $100 to receiver
@@ -57,10 +57,10 @@ curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $RE
 curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/fin_ops/deposits -d '{"amount_cents": 20000}'
 ```
 
-## Search Client by Email
+## Search Customer by Email
 
 ```bash
-curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/cx/client\?public_email=test2@example.com
+curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/cx/customer\?public_email=test2@example.com
 
 RECEIVER_ID=... # public_id from the response of the command above
 ```

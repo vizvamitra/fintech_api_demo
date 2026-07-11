@@ -1,21 +1,21 @@
 module FinOps
   module Bookkeeping
-    class ProvisionClientAccounts
-      LABEL_PATTERN = "liabilities:client-deposits:%{client_id}:%{subaccount}"
+    class ProvisionCustomerAccounts
+      LABEL_PATTERN = "liabilities:customer-deposits:%{customer_id}:%{subaccount}"
       GL_CODES = { available: "2110", reserved: "2120" }
 
       def initialize(accounting: Accounting::Interface.new)
         @_accounting = accounting
       end
 
-      # @param client_id [UUID]
+      # @param customer_id [UUID]
       #
       # @return [Hash{available: String, reserved: String}]
       #
-      def call(client_id:)
+      def call(customer_id:)
         ApplicationRecord.transaction do
-          available = create_client_account(client_id, :available)
-          reserved = create_client_account(client_id, :reserved)
+          available = create_customer_account(customer_id, :available)
+          reserved = create_customer_account(customer_id, :reserved)
 
           { available: available.label, reserved: reserved.label }
         end
@@ -25,12 +25,12 @@ module FinOps
 
       attr_reader :_accounting
 
-      def create_client_account(client_id, subaccount)
+      def create_customer_account(customer_id, subaccount)
         _accounting.create_account(
           category: :liability,
           code: GL_CODES[subaccount],
-          label: LABEL_PATTERN % { client_id:, subaccount: },
-          owner_ref: "client:#{client_id}"
+          label: LABEL_PATTERN % { customer_id:, subaccount: },
+          owner_ref: "customer:#{customer_id}"
         )
       end
     end

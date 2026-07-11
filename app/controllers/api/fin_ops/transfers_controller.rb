@@ -11,7 +11,7 @@ module Api
       def create_params
         {
           **params.require(:transfer).permit(:amount_cents, :receiver_id),
-          client_id: current_credentials.client_id
+          customer_id: current_credentials.customer_id
         }
       end
     end

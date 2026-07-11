@@ -1,7 +1,7 @@
 class CreateCXMoneyMovements < ActiveRecord::Migration[8.1]
   def change
     create_table :cx_money_movements do |t|
-      t.references :client, null: false, index: true
+      t.references :customer, null: false, index: true
       t.references :sender, index: true
       t.integer :kind, limit: 2, null: false
       t.uuid :reference, null: false
@@ -13,9 +13,9 @@ class CreateCXMoneyMovements < ActiveRecord::Migration[8.1]
 
       t.timestamps
 
-      t.index %i[client_id kind]
-      t.index %i[client_id initiated_at]
-      t.index %i[client_id reference], unique: true
+      t.index %i[customer_id kind]
+      t.index %i[customer_id initiated_at]
+      t.index %i[customer_id reference], unique: true
     end
   end
 end

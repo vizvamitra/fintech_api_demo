@@ -5,17 +5,17 @@ module Api
         @_accounting = accounting
       end
 
-      # @param client_id [UUID]
+      # @param customer_id [UUID]
       #
-      # @return [Hash{client: CX::Clinet, balance_cents: Integer}]
+      # @return [Hash{customer: CX::Customer, balance_cents: Integer}]
       #
-      def call(client_id:)
-        client = ::CX::Client.public_find(client_id)
-        payer = ::FinOps::PayerAccount.find_by!(client_id: client.public_id)
+      def call(customer_id:)
+        customer = ::CX::Customer.public_find(customer_id)
+        payer = ::FinOps::PayerAccount.find_by!(customer_id: customer.public_id)
 
         balance = read_balance(payer)
 
-        { client:, balance_cents: balance }
+        { customer:, balance_cents: balance }
       end
 
       attr_reader :_accounting

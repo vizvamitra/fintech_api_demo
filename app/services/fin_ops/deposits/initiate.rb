@@ -4,24 +4,24 @@ module FinOps
       def initialize(record_deposit: Bookkeeping::RecordDeposit.new,
                      min_amount: Rails.configuration.x.fin_ops.min_deposit_amount_cents,
                      max_amount: Rails.configuration.x.fin_ops.max_deposit_amount_cents,
-                     clients: CX::Interface.new)
+                     customers: CX::Interface.new)
         @_record_deposit = record_deposit
         @_min_amount = min_amount
         @_max_amount = max_amount
-        @_clients = clients
+        @_customers = customers
       end
 
-      # @param client_id [UUID]
+      # @param customer_id [UUID]
       # @param amount_cents [Integer]
       #
       # @return [FinOps::Deposit]
       # @raise [ActiveRecord::RecordNotFound]
       # @raise [FinOps::AmountOutOfRangeError]
       #
-      def call(client_id:, amount_cents:)
+      def call(customer_id:, amount_cents:)
         raise AmountOutOfRangeError unless (_min_amount.._max_amount).cover?(amount_cents)
 
-        payer = FinOps::PayerAccount.find_by!(client_id:)
+        payer = FinOps::PayerAccount.find_by!(customer_id:)
 
         # The real app would probably work with some third-party payment processor, which
         # would make deposits asynchronous and require the app to track their life cycles.
@@ -54,7 +54,7 @@ module FinOps
 
       private
 
-      attr_reader :_record_deposit, :_clients, :_min_amount, :_max_amount
+      attr_reader :_record_deposit, :_customers, :_min_amount, :_max_amount
 
       def create_deposit(payer, amount_cents)
         payer.deposits.create!(amount_cents:)
@@ -65,8 +65,8 @@ module FinOps
       end
 
       def notify_cx_about_money_movement(payer, deposit)
-        _clients.store_money_movement(
-          client_id: payer.client_id,
+        _customers.store_money_movement(
+          customer_id: payer.customer_id,
           kind: :deposit,
           reference: deposit.public_id,
           state: :settled,

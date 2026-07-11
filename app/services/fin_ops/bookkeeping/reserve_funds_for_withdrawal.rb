@@ -1,7 +1,7 @@
 module FinOps
   module Bookkeeping
     class ReserveFundsForWithdrawal
-      REFERENCE_TYPE = "client_withdrawal"
+      REFERENCE_TYPE = "customer_withdrawal"
 
       def initialize(accounting: Accounting::Interface.new)
         @_accounting = accounting
@@ -34,8 +34,8 @@ module FinOps
 
       def entry_description(payer, withdrawal)
         [
-          "Client Withdrawal #{withdrawal.public_id}",
-          "Client #{payer.client_id}",
+          "Customer Withdrawal #{withdrawal.public_id}",
+          "Customer #{payer.customer_id}",
           "$#{(withdrawal.amount_cents.to_f / 100).round(2)}",
           "Fund Reservation"
         ].join(" - ")

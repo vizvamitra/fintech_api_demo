@@ -9,8 +9,8 @@ module ApiHelpers
     post("api/sign_ups", params: { email: })
   end
 
-  def sign_in(client)
-    credentials = Credentials.find_by!(client_id: client["public_id"])
+  def sign_in(customer)
+    credentials = Credentials.find_by!(customer_id: customer["public_id"])
 
     params = { email: credentials.email }
     token = post("/api/sign_ins", params:).dig('data', 'access_token')
@@ -27,16 +27,16 @@ module ApiHelpers
     header('Authorization', nil)
   end
 
-  ### Current Client
+  ### Current Customer
 
-  def fetch_current_client
+  def fetch_current_customer
     get("api/me")["data"]
   end
 
-  ### Client Experience
+  ### Customer Experience
 
-  def search_client(email:)
-    get("api/cx/client", params: { public_email: email })["data"]
+  def search_customer(email:)
+    get("api/cx/customer", params: { public_email: email })["data"]
   end
 
   def fetch_money_movements

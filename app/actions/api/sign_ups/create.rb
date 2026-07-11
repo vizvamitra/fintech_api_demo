@@ -1,8 +1,8 @@
 module Api
   module SignUps
     class Create
-      def initialize(clients: ::CX::Interface.new)
-        @_clients = clients
+      def initialize(customers: ::CX::Interface.new)
+        @_customers = customers
       end
 
       # @param email [String]
@@ -14,11 +14,11 @@ module Api
         ApplicationRecord.transaction do
           email = email.downcase
 
-          client = _clients.create_client(public_email: email)
+          customer = _customers.create_customer(public_email: email)
 
           # Credentials are created here because they belong to an authentication mechanism specific to this interface: a web app accessed over HTTP. A desktop app or CLI might use a different mechanism. Credentials therefore belong to the API layer rather than to one of the business subdomains.
           #
-          Credentials.create!(email:, client_id: client.public_id)
+          Credentials.create!(email:, customer_id: customer.public_id)
         end
       rescue ::CX::EmailTakenError
         raise HttpErrors::UnprocessableContentError, :email_is_taken
@@ -26,7 +26,7 @@ module Api
 
       private
 
-      attr_reader :_clients
+      attr_reader :_customers
     end
   end
 end

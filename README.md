@@ -2,7 +2,7 @@
 
 This is a small Rails API-only app built as part of a client evaluation process. 
 
-The app allows its clients to sign up, deposit funds, transfer funds to others, withdraw funds and list money movements. The app keeps track of all cash flows using double entry accounting.
+The app allows its customers to sign up, deposit funds, transfer funds to others, withdraw funds and list money movements. The app keeps track of all cash flows using double entry accounting.
 
 This is not a production-ready financial system, but a demo intended to showcase my architectural and engineering skills. Most of the code was written over a weekend; the README took additional time. No real money is involved, there are no payment-processor integrations, and the test suite includes only representative examples of unit and feature tests.
 
@@ -75,19 +75,19 @@ All authenticated endpoints expect `Authorization: Bearer <access_token>`.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/sign_ups` | Create a client from an email. |
+| `POST` | `/api/sign_ups` | Create a customer from an email. |
 | `POST` | `/api/sign_ins` | Issue a JWT access token for an existing email. |
-| `GET` | `/api/me` | Return the current client and available balance. |
-| `GET` | `/api/cx/client` | Search client by public email. |
-| `GET` | `/api/cx/money_movements` | List client-visible money movement history. |
-| `POST` | `/api/fin_ops/deposits` | Deposit funds into the current client's account. |
-| `POST` | `/api/fin_ops/withdrawals` | Withdraw funds from the current client's account. |
-| `POST` | `/api/fin_ops/transfers` | Transfer funds to another client. |
+| `GET` | `/api/me` | Return the current customer and available balance. |
+| `GET` | `/api/cx/customer` | Search customer by public email. |
+| `GET` | `/api/cx/money_movements` | List customer-visible money movement history. |
+| `POST` | `/api/fin_ops/deposits` | Deposit funds into the current customer's account. |
+| `POST` | `/api/fin_ops/withdrawals` | Withdraw funds from the current customer's account. |
+| `POST` | `/api/fin_ops/transfers` | Transfer funds to another customer. |
 
 Request bodies are resource-wrapped JSON, for example:
 
 ```json
-{ "sign_up": { "email": "client@example.com" } }
+{ "sign_up": { "email": "customer@example.com" } }
 { "deposit": { "amount_cents": 2000 } }
 { "withdrawal": { "amount_cents": 2000 } }
 { "transfer": { "receiver_id": "...", "amount_cents": 500 } }
@@ -151,13 +151,13 @@ For complex read-only requests (e.g., indexing a collection with adjustable filt
 
 I've identified three subdomains in this app, distinct by the specific problem they solve:
 
-* `Client Experience (CX)`: client enrollment, client-visible activity and capabilities
+* `Customer Experience (CX)`: customer enrollment, customer-visible activity and capabilities
 * `Financial Operations (FinOps)`: orchestration and lifecycle tracking for deposits, withdrawals and transfers
 * `Accounting`: reliable, auditable record of financial facts and the source of truth for account balances
 
 Each of those problem spaces would most likely evolve separately and have different non-functional requirements. The application is split into bounded contexts following this distinction. 
 
-`CX` currently groups the capabilities through which clients enter and use the product: enrollment, counterparty discovery, and a client-specific view of financial activity. Its boundary is the least settled of the three and would likely be refined as product, eligibility, and compliance rules emerge.
+`CX` currently groups the capabilities through which customers enter and use the product: enrollment, counterparty discovery, and a customer-specific view of financial activity. Its boundary is the least settled of the three and would likely be refined as product, eligibility, and compliance rules emerge.
 
 Authentication is not considered a separate subdomain, but rather a presentation-specific detail that happens to store some state. This might change with the evolution of the system though. 
 
@@ -169,8 +169,8 @@ Solid lines represent direct table relationships. Dashed lines represent logical
 
 In the DB, tables are prefixed with the name of the context they come from (e.g. `fin_ops_deposits`, `accounting_postings`). 
 
-`Accounting` records financial facts with double-entry accounting model. Each money movement is expressed as a journal entry containing at least two postings, debit and credit, with a constraint that total debits should always match total credits (entry should be "balanced"). This makes balance changes auditable. Clients have a pair of accounts: for available and reserved funds. Account balance is calculated on the fly by summing the related postings. The full chart of accounts and transaction rules are documented in [docs/accounting.md](docs/accounting.md).
+`Accounting` records financial facts with double-entry accounting model. Each money movement is expressed as a journal entry containing at least two postings, debit and credit, with a constraint that total debits should always match total credits (entry should be "balanced"). This makes balance changes auditable. Customers have a pair of accounts: for available and reserved funds. Account balance is calculated on the fly by summing the related postings. The full chart of accounts and transaction rules are documented in [docs/accounting.md](docs/accounting.md).
 
 `Deposits`, `Withdrawals` and `Transfers` in FinOps track corresponding operation lifecycles.
 
-`Money Movements` represent client-scoped projections of money movements from the viewpoint of this specific client. E.g., a single `Transfer` would produce two money movements: sender will see an "outgoing transfer" while receiver -- an "incoming transfer".
+`Money Movements` represent customer-scoped projections of money movements from the viewpoint of this specific customer. E.g., a single `Transfer` would produce two money movements: sender will see an "outgoing transfer" while receiver -- an "incoming transfer".

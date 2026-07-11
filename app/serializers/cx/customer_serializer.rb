@@ -1,5 +1,5 @@
 module CX
-  class ClientSerializer < ApplicationSerializer
+  class CustomerSerializer < ApplicationSerializer
     attributes :public_id, :public_email
   end
 end

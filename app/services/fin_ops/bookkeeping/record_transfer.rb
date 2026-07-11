@@ -35,9 +35,9 @@ module FinOps
 
       def entry_description(sender, receiver, transfer)
         [
-          "Inter-Client Transfer #{transfer.public_id}",
-          "Sender #{sender.client_id}",
-          "Receiver #{receiver.client_id}",
+          "Inter-Customer Transfer #{transfer.public_id}",
+          "Sender #{sender.customer_id}",
+          "Receiver #{receiver.customer_id}",
           "$#{(transfer.amount_cents.to_f / 100).round(2)}"
         ].join(" - ")
       end

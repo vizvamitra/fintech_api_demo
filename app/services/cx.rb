@@ -1,4 +1,4 @@
-# CX stands for Client Experience
+# CX stands for Customer Experience
 #
 module CX
   Error = Class.new(StandardError)

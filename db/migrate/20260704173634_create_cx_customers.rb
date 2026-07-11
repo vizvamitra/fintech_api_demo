@@ -1,8 +1,8 @@
-class CreateCXClients < ActiveRecord::Migration[8.1]
+class CreateCXCustomers < ActiveRecord::Migration[8.1]
   def change
     enable_extension "uuid-ossp"
 
-    create_table :cx_clients do |t|
+    create_table :cx_customers do |t|
       t.uuid :public_id, null: false, default: "uuid_generate_v4()"
       t.string :public_email, null: false
 
@@ -12,7 +12,7 @@ class CreateCXClients < ActiveRecord::Migration[8.1]
       t.index :public_email, unique: true
     end
 
-    add_column :credentials, :client_id, :uuid
-    add_index :credentials, :client_id, unique: true
+    add_column :credentials, :customer_id, :uuid
+    add_index :credentials, :customer_id, unique: true
   end
 end
