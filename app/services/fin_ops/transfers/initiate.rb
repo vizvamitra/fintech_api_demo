@@ -2,8 +2,8 @@ module FinOps
   module Transfers
     class Initiate
       def initialize(record_transfer: Bookkeeping::RecordTransfer.new,
-                     min_amount: Rails.configuration.x.fin_ops.min_transfer_amount,
-                     max_amount: Rails.configuration.x.fin_ops.max_transfer_amount,
+                     min_amount: Rails.configuration.x.fin_ops.min_transfer_amount_cents,
+                     max_amount: Rails.configuration.x.fin_ops.max_transfer_amount_cents,
                      accounting: Accounting::Interface.new,
                      customers: CX::Interface.new)
         @_record_transfer = record_transfer
