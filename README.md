@@ -1,6 +1,6 @@
 # Fintech API Demo
 
-> **Note:** This README is human-written.
+> **Note:** Both the code and this README are human-written.
 
 A small wallet-style Rails API-only demo app. It features deposits, withdrawals, between-user transfers, balance checks and transaction history, and tracks all cash flows using double-entry accounting.
 
@@ -8,19 +8,17 @@ The purpose of this repo is to demonstrate my engineering skill. I wrote most of
 
 **Stack:** Ruby 4.0, Rails 8.1, PostgreSQL, RS256 JWT, Alba, RSpec
 
-> **Scope note:** This is an architectural demo, not a production financial system. No real money or payment processors are involved, some non-essential parts are intentionally kept rudimentary and tests are representative rather than exhaustive
+> **Scope note:** This is an architectural demo, not a production financial system. No real money or payment processors are involved, some non-essential parts are intentionally kept rudimentary and tests are representative rather than exhaustive. See [Simplifications & Tradeoffs](#simplifications--tradeoffs) for details.
 
 ## Highlights
 
-- **Double-entry accounting:** Balanced journal entries, derived balances and fund reservation for withdrawals, with a complete audit trail
-- **Modular monolith:** Three bounded contexts ("CX", "FinOps" and "Accounting") communicating strictly through explicit interfaces
-- **Clear layering:** Business workflows, fact storage, presentation and low-level focused tools are modeled independently of each other
-- **Process-oriented business logic:** Business workflows are captured in function-style classes aligned with how people naturally think about processes
-- **Small, fixed set of object roles:** A limited vocabulary of building blocks per layer helps any part of the codebase feel familiar
+- **Auditable money movement:** All cash flows use double-entry accounting, balanced journal entries, derived balances, and two-phase fund reservation for withdrawals, leaving a complete, verifiable audit trail.
+- **Built to grow across teams (modular monolith):** Three bounded contexts (customer experience (`CX`), financial operations (`FinOps`), and `Accounting`) sit behind explicit interfaces so each area can evolve independently and be split out easily.
+- **Maintainable without over-engineering:** Business workflows live in function-style classes aligned with how people naturally think about processes, cleanly separated from presentation, storage, and low-level tools. A small, fixed set of building blocks per layer helps any part of the codebase feel familiar.
 
 ## Reading Guide
 
-- **Evaluating architecture & domain modeling:** [Architecture](#architecture) -> [Code Navigation](#code-navigation) -> [Accounting Rules](docs/accounting.md)
+- **Evaluating architecture & domain modeling:** [Architecture](#architecture) -> [Code Navigation](#code-navigation) -> [Simplifications & Tradeoffs](#simplifications--tradeoffs) -> [Accounting Rules](docs/accounting.md)
 - **Running or testing the API locally:** [API](#api) -> [Setup](#setup) -> [Example `curl` Walkthrough](docs/curl_commands.md)
 - **Original task:** [Task Definition](docs/task_definition.md)
 
@@ -127,21 +125,34 @@ For simple read-only requests that only involve several model calls, referencing
 
 For complex read-only requests (e.g., indexing a collection with adjustable filters and sorting), maintaining layer boundaries through action/interface is mandatory. There are no examples of complex read-only requests in this particular app though.
 
-### Guided Tour: Following a Transfer
+### Tracing a Transfer
 
 To see the layering and context boundaries in practice, trace `POST /api/fin_ops/transfers` top to bottom:
 
-1. **HTTP entry point** — [`TransfersController`](app/controllers/api/fin_ops/transfers_controller.rb) extracts params, delegates to the action, and serializes the result via [`TransferSerializer`](app/serializers/fin_ops/transfer_serializer.rb).
-2. **Input validation & error mapping** — [`Api::FinOps::Transfers::Create`](app/actions/api/fin_ops/transfers/create.rb) checks input shape, calls `FinOps::Interface`, and maps domain errors to [`HttpErrors`](lib/http_errors.rb).
-3. **Context boundary** — [`FinOps::Interface`](app/services/fin_ops/interface.rb) exposes the context's public API and inherits uniform tagged logging/timing from [`Subsystems::Interface`](lib/subsystems/interface.rb).
-4. **Workflow orchestration** — [`FinOps::Transfers::Initiate`](app/services/fin_ops/transfers/initiate.rb) checks limits, locks the sender's `PayerAccount`, verifies available balance, creates the transfer record, and coordinates `Accounting` and `CX`.
-5. **Double-entry ledger** — [`FinOps::Bookkeeping::RecordTransfer`](app/services/fin_ops/bookkeeping/record_transfer.rb) hands debit/credit postings to [`Accounting::JournalEntries::Create`](app/services/accounting/journal_entries/create.rb), which enforces balance, locks accounts in deterministic order, and persists the entry with an idempotency key.
-6. **Customer projection** — [`CX::MoneyMovements::Store`](app/services/cx/money_movements/store.rb) records two customer-scoped views (`outgoing_transfer` for the sender, `incoming_transfer` for the receiver).
+1. **HTTP entry point:** [`TransfersController`](app/controllers/api/fin_ops/transfers_controller.rb) extracts params, delegates to the action, and serializes the result via [`TransferSerializer`](app/serializers/fin_ops/transfer_serializer.rb).
+2. **Input validation & error mapping:** [`Api::FinOps::Transfers::Create`](app/actions/api/fin_ops/transfers/create.rb) checks input shape, calls `FinOps::Interface`, and maps domain errors to [`HttpErrors`](lib/http_errors.rb).
+3. **Context boundary:** [`FinOps::Interface`](app/services/fin_ops/interface.rb) exposes the context's public API and inherits uniform tagged logging/timing from [`Subsystems::Interface`](lib/subsystems/interface.rb).
+4. **Workflow orchestration:** [`FinOps::Transfers::Initiate`](app/services/fin_ops/transfers/initiate.rb) checks limits, locks the sender's `PayerAccount`, verifies available balance, creates the transfer record, and coordinates `Accounting` and `CX`.
+5. **Double-entry ledger:** [`FinOps::Bookkeeping::RecordTransfer`](app/services/fin_ops/bookkeeping/record_transfer.rb) hands debit/credit postings to [`Accounting::JournalEntries::Create`](app/services/accounting/journal_entries/create.rb), which enforces balance, locks accounts in deterministic order, and persists the entry with an idempotency key.
+6. **Customer projection:** [`CX::MoneyMovements::Store`](app/services/cx/money_movements/store.rb) records two customer-scoped views (`outgoing_transfer` for the sender, `incoming_transfer` for the receiver).
 
 **A few other representative files:**
 * **Two-phase fund reservation:** [`FinOps::Withdrawals::Initiate`](app/services/fin_ops/withdrawals/initiate.rb)
 * **Pragmatic read-only controller (skipping action/interface):** [`Api::CX::MoneyMovementsController`](app/controllers/api/cx/money_movements_controller.rb)
 * **Tests:** [`financial_operations_spec.rb`](spec/features/financial_operations_spec.rb) (end-to-end) and [`initiate_spec.rb`](spec/services/fin_ops/deposits/initiate_spec.rb) (isolated unit spec)
+
+## Simplifications & Tradeoffs
+
+To stay within a weekend scope focused on domain modeling and architecture, several production concerns are intentionally simplified (most are documented inline at the relevant call sites):
+
+- **Synchronous deposits:** Real deposits are asynchronous. They notify a payment processor about a payment intent, redirect the customer, wait in `initiated` state until a settlement webhook arrives, and only then post to the ledger. Here, deposits settle immediately with no lifecycle. See [`FinOps::Deposits::Initiate`](app/services/fin_ops/deposits/initiate.rb).
+- **Synchronous withdrawals:** Real withdrawals are also asynchronous. They require a configured payout method and wait in `initiated` until a processor webhook triggers either ledger settlement or reservation release. Here, settlement happens immediately inside the same transaction solely to demonstrate two-phase fund reservation. See [`FinOps::Withdrawals::Initiate`](app/services/fin_ops/withdrawals/initiate.rb).
+- **Minimal chart of accounts:** Only `asset` and `liability` accounts are modeled (no equity, revenue, expense, or temporary accounts). In production, customer wallets would typically live in a dedicated subledger with summarized activity rolled up into the company general ledger. There would also be accounts for fees, commissions and such. See [`Accounting::Account`](app/models/accounting/account.rb), [`docs/accounting.md`](docs/accounting.md).
+- **On-the-fly balance calculation:** Balances are computed by summing all postings for an account on every read. A production ledger would use balance snapshots or rollups to avoid scanning full posting history. See [`Accounting::Accounts::ReadBalance`](app/services/accounting/accounts/read_balance.rb).
+- **No intent-level (API-level) idempotency:** Journal entries carry an idempotency key to prevent duplicate postings for the same internal operation, but API-level (intent-level) idempotency is not implemented, so retrying the same transfer, deposit, or withdrawal request will execute it twice.
+- **Rudimentary authentication:** Sign-up and sign-in are email-only, JWT authentication doesn't validate `iss`/`aud`, and there is no revocation or refresh flow, intentionally not production-safe. Credentials live in the API/presentation layer rather than a business subdomain because HTTP auth is treated as an interface detail. See [`Api::JwtAuthentication`](app/controllers/concerns/api/jwt_authentication.rb), [`Api::SignUps::Create`](app/actions/api/sign_ups/create.rb).
+- **Lightweight input validation:** Actions use minimal manual checks instead of a dedicated schema validator (e.g. `dry-schema`). See [`Api::FinOps::Deposits::Create`](app/actions/api/fin_ops/deposits/create.rb).
+- **Minimal test coverage:** Typically I test extensively, but here my goal was to show the testing style rather than reach full coverage, so there is one [unit test](spec/services/fin_ops/deposits/initiate_spec.rb) and one [end-to-end test](spec/features/financial_operations_spec.rb). The code likely has bugs, but I intentionally keep it frozen rather than polishing it later myself or with AI so it stays an honest snapshot of what I can write by hand over a weekend.
 
 ## Setup
 
