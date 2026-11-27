@@ -25,10 +25,10 @@ Receiver:
 
 ```bash
 # sender
-curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"email": "test@example.com"}'
+curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"sign_up": {"email": "test@example.com"}}'
 
 # receiver (for transfers)
-curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"email": "test2@example.com"}'
+curl -s -X POST -H "content-type: application/json" localhost:3000/api/sign_ups -d '{"sign_up": {"email": "test2@example.com"}}'
 ```
 
 ## Sign In
@@ -54,7 +54,7 @@ curl -s -X GET -H "content-type: application/json" -H "Authorization: Bearer $RE
 ## Create Deposit
 
 ```bash
-curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/fin_ops/deposits -d '{"amount_cents": 20000}'
+curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/fin_ops/deposits -d '{"deposit": {"amount_cents": 20000}}'
 ```
 
 ## Search Customer by Email
@@ -69,13 +69,13 @@ RECEIVER_ID=... # public_id from the response of the command above
 ## Create Transfer
 
 ```bash
-curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/fin_ops/transfers -d "{\"amount_cents\": 10000, \"receiver_id\": \"$RECEIVER_ID\"}"
+curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $SENDER_TOKEN" localhost:3000/api/fin_ops/transfers -d "{\"transfer\": {\"amount_cents\": 10000, \"receiver_id\": \"$RECEIVER_ID\"}}"
 ```
 
 ## Create Withdrawal
 
 ```bash
-curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $RECEIVER_TOKEN" localhost:3000/api/fin_ops/withdrawals -d '{"amount_cents": 5000}'
+curl -s -X POST -H "content-type: application/json" -H "Authorization: Bearer $RECEIVER_TOKEN" localhost:3000/api/fin_ops/withdrawals -d '{"withdrawal": {"amount_cents": 5000}}'
 ```
 
 ## List Money Movements
