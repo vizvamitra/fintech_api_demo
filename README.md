@@ -8,17 +8,18 @@ The purpose of this repo is to demonstrate my engineering skill. I wrote most of
 
 **Stack:** Ruby 4.0, Rails 8.1, PostgreSQL, RS256 JWT, Alba, RSpec
 
-> **Scope note:** This is an architectural demo, not a production financial system. No real money or payment processors are involved, some non-essential parts are intentionally kept rudimentary and tests are representative rather than exhaustive. See [Simplifications & Tradeoffs](#simplifications--tradeoffs) for details.
+> **Scope note:** This is an architectural demo, not a production financial system. No real money or payment processors are involved, some non-essential parts are intentionally kept rudimentary and tests are representative rather than exhaustive. See [Simplifications](#simplifications) for details.
 
 ## Highlights
 
-- **Auditable money movement:** All cash flows use double-entry accounting, balanced journal entries, derived balances, and two-phase fund reservation for withdrawals, leaving a complete, verifiable audit trail.
-- **Built to grow across teams (modular monolith):** Three bounded contexts (customer experience (`CX`), financial operations (`FinOps`), and `Accounting`) sit behind explicit interfaces so each area can evolve independently and be split out easily.
-- **Maintainable without over-engineering:** Business workflows live in function-style classes aligned with how people naturally think about processes, cleanly separated from presentation, storage, and low-level tools. A small, fixed set of building blocks per layer helps any part of the codebase feel familiar.
+- **Auditable money movement:** Every transaction, including fund reservations for withdrawals, is recorded with double-entry accounting, which ensures a complete, verifiable audit trail.
+- **Room to grow across teams:** The app is structured as a modular monolith with three bounded contexts: customer experience (`CX`), financial operations (`FinOps`), and `Accounting`. Each has its own data model and sits behind an explicit interface, which allows it to have its own domain language, evolve independently and be split out later without untangling the others first.
+- **Maintainable without over-engineering:** Business workflows live in function-style classes that mirror how people describe a process, kept apart from the code that exposes them to the outside world, stores data, or provides low-level tools.
+- **Low onboarding cost:** An intentionally small, fixed set of building blocks per layer and a predictable workflow structure keep cognitive load low, making it easier to onboard onto unfamiliar parts of the codebase and know what to expect from any class.
 
 ## Reading Guide
 
-- **Evaluating architecture & domain modeling:** [Architecture](#architecture) -> [Code Navigation](#code-navigation) -> [Simplifications & Tradeoffs](#simplifications--tradeoffs) -> [Accounting Rules](docs/accounting.md)
+- **Evaluating architecture & domain modeling:** [Architecture](#architecture) -> [Code Navigation](#code-navigation) -> [Simplifications](#simplifications) -> [Accounting Rules](docs/accounting.md)
 - **Running or testing the API locally:** [API](#api) -> [Setup](#setup) -> [Example `curl` Walkthrough](docs/curl_commands.md)
 - **Original task:** [Task Definition](docs/task_definition.md)
 
@@ -141,7 +142,7 @@ To see the layering and context boundaries in practice, trace `POST /api/fin_ops
 * **Pragmatic read-only controller (skipping action/interface):** [`Api::CX::MoneyMovementsController`](app/controllers/api/cx/money_movements_controller.rb)
 * **Tests:** [`financial_operations_spec.rb`](spec/features/financial_operations_spec.rb) (end-to-end) and [`initiate_spec.rb`](spec/services/fin_ops/deposits/initiate_spec.rb) (isolated unit spec)
 
-## Simplifications & Tradeoffs
+## Simplifications
 
 To stay within a weekend scope focused on domain modeling and architecture, several production concerns are intentionally simplified (most are documented inline at the relevant call sites):
 
